@@ -1,0 +1,16 @@
+package com.example.travelappapi.repository;
+
+import java.util.Optional;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import com.example.travelappapi.model.NguoiDung;
+
+@Repository
+public interface NguoiDungRepository extends JpaRepository<NguoiDung, Integer> {
+
+    // Spring Data JPA tự động tạo truy vấn tìm kiếm theo tên đăng nhập
+    Optional<NguoiDung> findByTenDangNhap(String tenDangNhap);
+
+}
