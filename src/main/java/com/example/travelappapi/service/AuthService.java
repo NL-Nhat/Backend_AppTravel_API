@@ -1,6 +1,5 @@
 package com.example.travelappapi.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.travelappapi.dto.LoginRequest;
@@ -12,7 +11,6 @@ public class AuthService {
 
     private final NguoiDungRepository nguoiDungRepository;
 
-    @Autowired
     public AuthService(NguoiDungRepository nguoiDungRepository) {
         this.nguoiDungRepository = nguoiDungRepository;
     }
