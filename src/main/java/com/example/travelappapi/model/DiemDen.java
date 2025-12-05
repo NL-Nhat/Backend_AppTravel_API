@@ -1,6 +1,9 @@
 package com.example.travelappapi.model;
 
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -10,6 +13,7 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity
 @Data
@@ -28,5 +32,7 @@ public class DiemDen {
     private String urlHinhAnh;
 
     @OneToMany(mappedBy = "diemDen")
+    @JsonIgnore  //Ngắt vòng lặp JSON khi lấy DiemDen
+    @ToString.Exclude  //Ngắt vòng lặp toString của Lombok
     private List<Tour> tours;
 }
