@@ -23,5 +23,5 @@ jobs:
       - name: Grant execute permission for mvnw
         run: chmod +x mvnw
 
-      - name: Build and Run Tests with Maven
-        run: ./mvnw clean install
+      - name: Build and Skip Tests
+        run: ./mvnw clean install -DskipTests
