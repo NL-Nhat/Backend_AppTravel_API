@@ -30,7 +30,7 @@ public class TourService {
         return tourRepository.findAll();
     }
 
-    public Tour getTourById(Integer id) {
+    public Tour getTourById(int id) {
         return tourRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Tour với ID " + id + " không tồn tại."));
     }

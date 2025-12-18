@@ -92,7 +92,7 @@ CREATE TABLE DatTour (
     soNguoiLon INT NOT NULL DEFAULT 1 CHECK (soNguoiLon > 0),
     soTreEm INT DEFAULT 0 CHECK (soTreEm >= 0),
     tongTien DECIMAL(18,2) NOT NULL CHECK (tongTien >= 0),
-    trangThaiDatTour NVARCHAR(20) NOT NULL DEFAULT 'ChoXacNhan' CHECK (trangThaiDatTour IN ('ChoXacNhan', 'ThanhCong', 'DaHuy')),
+    trangThaiDatTour NVARCHAR(20) NOT NULL DEFAULT 'ChoXacNhan' CHECK (trangThaiDatTour IN ('ChoXacNhan', 'DaXacNhan', 'DaHuy')),
     trangThaiThanhToan NVARCHAR(20) NOT NULL DEFAULT 'ChuaThanhToan' CHECK (trangThaiThanhToan IN ('ChuaThanhToan', 'DaThanhToan')),
     ngayDat DATETIME DEFAULT GETDATE(),
     ngayHuy DATETIME,
@@ -255,8 +255,8 @@ GO
 
 -- BẢNG 1: NGUOIDUNG (20 Users: 2 Admin, 5 HDV, 13 Khách)
 INSERT INTO NguoiDung (tenDangNhap, email, matKhau, hoTen, soDienThoai, diaChi, ngaySinh, gioiTinh, anhDaiDien, vaiTro, trangThai, thoiGianTao) VALUES
-(N'admin1', N'admin1@travel.com', N'123', N'Quản Trị Hệ Thống', N'0909001001', N'Hà Nội', '1990-01-01', N'Nam', N'admin1.jpg', N'Admin', N'HoatDong', '2023-01-01'),
-(N'admin2', N'admin2@travel.com', N'123', N'Trần Quản Lý', N'0909001002', N'HCM', '1992-05-05', N'Nu', N'admin2.jpg', N'Admin', N'HoatDong', '2023-01-02'),
+(N'admin2', N'admin1@travel.com', N'123', N'Quản Trị Hệ Thống', N'0909001001', N'Hà Nội', '1990-01-01', N'Nam', N'admin1.jpg', N'Admin', N'HoatDong', '2023-01-01'),
+(N'admin3', N'admin2@travel.com', N'123', N'Trần Quản Lý', N'0909001002', N'HCM', '1992-05-05', N'Nu', N'admin2.jpg', N'Admin', N'HoatDong', '2023-01-02'),
 -- HDV (ID 3,4,5,6,7)
 (N'hdv_hung', N'hung@travel.com', N'123', N'Lê Văn Hùng', N'0909002001', N'Đà Nẵng', '1995-02-02', N'Nam', N'hdv1.jpg', N'HuongDanVien', N'HoatDong', '2023-02-01'),
 (N'hdv_lan', N'lan@travel.com', N'123', N'Nguyễn Thị Lan', N'0909002002', N'Hà Nội', '1996-03-03', N'Nu', N'hdv2.jpg', N'HuongDanVien', N'HoatDong', '2023-02-05'),
@@ -377,26 +377,26 @@ GO
 -- BẢNG 6: DATTOUR (20 Bookings)
 -- Chú ý: Trigger sẽ tự update số lượng khách vào bảng LichKhoiHanh
 INSERT INTO DatTour (maNguoiDung, maLichKhoiHanh, soNguoiLon, soTreEm, tongTien, trangThaiDatTour, trangThaiThanhToan, ngayDat, ngayHuy, lyDoHuy) VALUES
-(8, 1, 2, 1, 3450000, N'ThanhCong', N'DaThanhToan', '2025-11-20 08:00:00', NULL, NULL), -- An đặt Bà Nà
+(8, 1, 2, 1, 3450000, N'DaXacNhan', N'DaThanhToan', '2025-11-20 08:00:00', NULL, NULL), -- An đặt Bà Nà
 (9, 1, 2, 0, 2500000, N'ChoXacNhan', N'ChuaThanhToan', '2025-11-25 09:00:00', NULL, NULL), -- Bình đặt Bà Nà
-(10, 3, 2, 0, 7000000, N'ThanhCong', N'DaThanhToan', '2025-11-22 10:00:00', NULL, NULL), -- Cường đặt Hạ Long
-(11, 4, 2, 2, 15000000, N'ThanhCong', N'DaThanhToan', '2025-11-15 11:00:00', NULL, NULL), -- Dung đặt Phú Quốc
+(10, 3, 2, 0, 7000000, N'DaXacNhan', N'DaThanhToan', '2025-11-22 10:00:00', NULL, NULL), -- Cường đặt Hạ Long
+(11, 4, 2, 2, 15000000, N'DaXacNhan', N'DaThanhToan', '2025-11-15 11:00:00', NULL, NULL), -- Dung đặt Phú Quốc
 (12, 4, 4, 0, 18000000, N'DaHuy', N'ChuaThanhToan', '2025-11-10 12:00:00', '2025-11-11 08:00:00', N'Bận việc đột xuất'), -- Em hủy Phú Quốc
-(13, 6, 2, 0, 1900000, N'ThanhCong', N'ChuaThanhToan', '2025-11-18 13:00:00', NULL, NULL), -- Phúc đặt Ninh Bình
-(14, 5, 2, 0, 1400000, N'ThanhCong', N'DaThanhToan', '2025-11-19 14:00:00', NULL, NULL), -- Giang đặt Đà Lạt
-(15, 6, 2, 0, 1900000, N'ThanhCong', N'DaThanhToan', '2025-11-21 15:00:00', NULL, NULL), -- Huy đặt Ninh Bình
+(13, 6, 2, 0, 1900000, N'DaXacNhan', N'ChuaThanhToan', '2025-11-18 13:00:00', NULL, NULL), -- Phúc đặt Ninh Bình
+(14, 5, 2, 0, 1400000, N'DaXacNhan', N'DaThanhToan', '2025-11-19 14:00:00', NULL, NULL), -- Giang đặt Đà Lạt
+(15, 6, 2, 0, 1900000, N'DaXacNhan', N'DaThanhToan', '2025-11-21 15:00:00', NULL, NULL), -- Huy đặt Ninh Bình
 (16, 17, 4, 2, 22000000, N'ChoXacNhan', N'ChuaThanhToan', '2025-11-26 16:00:00', NULL, NULL), -- Yên đặt Liên tuyến
-(17, 7, 5, 0, 3750000, N'ThanhCong', N'DaThanhToan', '2025-11-10 17:00:00', NULL, NULL), -- Khánh đặt Huế
-(8, 7, 2, 1, 1950000, N'ThanhCong', N'DaThanhToan', '2025-11-11 18:00:00', NULL, NULL), -- An đặt Huế
-(9, 10, 2, 1, 5400000, N'ThanhCong', N'DaThanhToan', '2025-11-23 19:00:00', NULL, NULL), -- Bình đặt Miền Tây
+(17, 7, 5, 0, 3750000, N'DaXacNhan', N'DaThanhToan', '2025-11-10 17:00:00', NULL, NULL), -- Khánh đặt Huế
+(8, 7, 2, 1, 1950000, N'DaXacNhan', N'DaThanhToan', '2025-11-11 18:00:00', NULL, NULL), -- An đặt Huế
+(9, 10, 2, 1, 5400000, N'DaXacNhan', N'DaThanhToan', '2025-11-23 19:00:00', NULL, NULL), -- Bình đặt Miền Tây
 (10, 11, 2, 0, 6400000, N'ChoXacNhan', N'ChuaThanhToan', '2025-08-01 20:00:00', NULL, NULL), -- Cường đặt Mù Cang Chải
-(11, 13, 2, 0, 10000000, N'ThanhCong', N'DaThanhToan', '2025-11-01 21:00:00', NULL, NULL), -- Dung đặt Côn Đảo
-(12, 19, 1, 0, 500000, N'ThanhCong', N'ChuaThanhToan', '2025-11-27 08:00:00', NULL, NULL), -- Em đặt Food tour
-(13, 16, 2, 0, 2400000, N'ThanhCong', N'DaThanhToan', '2025-11-28 09:00:00', NULL, NULL), -- Phúc đặt Nam Cát Tiên
-(14, 2, 2, 0, 1700000, N'ThanhCong', N'ChuaThanhToan', '2025-11-29 10:00:00', NULL, NULL), -- Giang đặt Hội An
+(11, 13, 2, 0, 10000000, N'DaXacNhan', N'DaThanhToan', '2025-11-01 21:00:00', NULL, NULL), -- Dung đặt Côn Đảo
+(12, 19, 1, 0, 500000, N'DaXacNhan', N'ChuaThanhToan', '2025-11-27 08:00:00', NULL, NULL), -- Em đặt Food tour
+(13, 16, 2, 0, 2400000, N'DaXacNhan', N'DaThanhToan', '2025-11-28 09:00:00', NULL, NULL), -- Phúc đặt Nam Cát Tiên
+(14, 2, 2, 0, 1700000, N'DaXacNhan', N'ChuaThanhToan', '2025-11-29 10:00:00', NULL, NULL), -- Giang đặt Hội An
 (15, 12, 2, 0, 3000000, N'ChoXacNhan', N'ChuaThanhToan', '2025-11-29 11:00:00', NULL, NULL), -- Huy đặt Sapa
-(8, 14, 2, 1, 7600000, N'ThanhCong', N'DaThanhToan', '2025-11-15 12:00:00', NULL, NULL), -- An đặt Ba Bể
-(9, 20, 4, 0, 18000000, N'ThanhCong', N'ChuaThanhToan', '2025-11-30 08:00:00', NULL, NULL); -- Bình đặt Phú Quốc đợt 2
+(8, 14, 2, 1, 7600000, N'DaXacNhan', N'DaThanhToan', '2025-11-15 12:00:00', NULL, NULL), -- An đặt Ba Bể
+(9, 20, 4, 0, 18000000, N'DaXacNhan', N'ChuaThanhToan', '2025-11-30 08:00:00', NULL, NULL); -- Bình đặt Phú Quốc đợt 2
 GO
 
 -- BẢNG 7: THANHTOAN (~15 Giao dịch)
@@ -523,3 +523,8 @@ GO
 select *from NguoiDung
 select *from Tour
 select *from LichKhoiHanh
+
+
+UPDATE NguoiDung
+SET matKhau = '$2a$10$8.UnVuG9HHgffUDAlk8qfOuVGkqRzgVymGe07xd00DMxs.TVuHOn2'
+WHERE matKhau = '123';
