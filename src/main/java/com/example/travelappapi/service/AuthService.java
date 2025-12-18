@@ -1,38 +1,33 @@
 package com.example.travelappapi.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import com.example.travelappapi.dto.LoginRequest;
 import com.example.travelappapi.model.NguoiDung;
 import com.example.travelappapi.repository.NguoiDungRepository;
 
 @Service
-public class AuthService {
+public class AuthService implements UserDetailsService{
 
-    private final NguoiDungRepository nguoiDungRepository;
+    @Autowired
+    private NguoiDungRepository nguoiDungRepository;
 
-    public AuthService(NguoiDungRepository nguoiDungRepository) {
-        this.nguoiDungRepository = nguoiDungRepository;
-    }
+    @Override
+    public UserDetails loadUserByUsername(String tenDangNhap) throws UsernameNotFoundException{
+        // Tìm người dùng, nếu không thấy thì ném ra ngoại lệ ngay lập tức
+        NguoiDung user = nguoiDungRepository.findByTenDangNhap(tenDangNhap)
+            .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-    public NguoiDung authenticate(LoginRequest loginRequest) {
-        
-        // 1. Tìm người dùng
-        NguoiDung nguoiDung = nguoiDungRepository.findByTenDangNhap(loginRequest.getTenDangNhap())
-                .orElseThrow(() -> new RuntimeException("Tên đăng nhập không tồn tại."));
-
-        // 2. SO SÁNH MẬT KHẨU 
-        if (!loginRequest.getMatKhau().equals(nguoiDung.getMatKhau())) {
-            throw new RuntimeException("Mật khẩu không đúng.");
-        }
-        
-        // 3. Kiểm tra trạng thái 
-        if (!nguoiDung.getTrangThai().equals("HoatDong")) {
-            throw new RuntimeException("Tài khoản đang bị " + nguoiDung.getTrangThai());
+        // Kiểm tra trạng thái tài khoản
+        if (!user.isEnabled()) {
+            throw new DisabledException("Tài khoản của bạn đã bị khóa. Vui lòng liên hệ Admin!");
         }
 
-        // Đăng nhập thành công
-        return nguoiDung;
+        return user;
     }
-
+    
 }
