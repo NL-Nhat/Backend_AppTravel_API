@@ -61,7 +61,7 @@ public class SecurityConfig {
             .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
 
             // Khu vực dành riêng cho Quản trị viên
-            // .requestMatchers("/api/admin/**").hasRole("Admin")
+            .requestMatchers("/api/admin/**").permitAll()
 
             // Các khu vực còn lại yêu cầu phải đăng nhập
             .anyRequest().authenticated()
