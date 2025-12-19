@@ -519,12 +519,62 @@ INSERT INTO GuiYeuCauTour (maLichTrinh, ngayGui, trangThai) VALUES
 (8, '2025-11-04 11:40:00', N'ChoDuyet');
 GO
 
+UPDATE NguoiDung
+SET matKhau = '$2a$10$8.UnVuG9HHgffUDAlk8qfOuVGkqRzgVymGe07xd00DMxs.TVuHOn2'
+WHERE matKhau = '123';
+
+GO
+CREATE PROCEDURE sp_LayHoatDongGanDay
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Lấy 10 hoạt động mới nhất từ 3 nguồn khác nhau
+    SELECT TOP 10 * FROM (
+        -- 1. Hoạt động Đặt Tour (Từ bảng DatTour)
+        SELECT 
+            'BOOKING' AS loai, 
+            N'Khách hàng đã đặt tour mới' AS tieuDe,
+            ND.hoTen + N' đã đặt tour ' + T.tenTour AS moTa,
+            DT.ngayDat AS thoiGian
+        FROM DatTour DT
+        JOIN NguoiDung ND ON DT.maNguoiDung = ND.maNguoiDung
+        JOIN LichKhoiHanh LKH ON DT.maLichKhoiHanh = LKH.maLichKhoiHanh
+        JOIN Tour T ON LKH.maTour = T.maTour
+
+        UNION ALL
+
+        -- 2. Hoạt động Đánh giá (Từ bảng DanhGia)
+        SELECT 
+            'REVIEW' AS loai, 
+            N'Khách hàng đã đánh giá' AS tieuDe,
+            ND.hoTen + N' đã đánh giá ' + CAST(DG.diemSo AS NVARCHAR) + N' sao cho ' + T.tenTour AS moTa,
+            DG.thoiGianTao AS thoiGian
+        FROM DanhGia DG
+        JOIN NguoiDung ND ON DG.maNguoiDung = ND.maNguoiDung
+        JOIN Tour T ON DG.maTour = T.maTour
+
+        UNION ALL
+
+        -- 3. Hoạt động Thanh toán (Từ bảng ThanhToan)
+        SELECT 
+            'PAYMENT' AS loai,
+            N'Khách hàng đã thanh toán' AS tieuDe,
+            N'Khách hàng' + ND.hoTen + N' đã thanh toán tour ' + T.tenTour AS moTa,
+            ngayThanhToan AS thoiGian
+        FROM ThanhToan TT
+        JOIN DatTour DT on TT.maDatTour = DT.maDatTour
+        JOIN NguoiDung ND on DT.maNguoiDung = ND.maNguoiDung
+        JOIN LichKhoiHanh LKH on DT.maLichKhoiHanh = LKH.maLichKhoiHanh
+        JOIN Tour T on T.maTour = LKH.maTour
+    ) AS CombinedActivities
+    ORDER BY thoiGian DESC;
+END;
+GO
+
+Exec sp_LayHoatDongGanDay
+
 
 select *from NguoiDung
 select *from Tour
 select *from LichKhoiHanh
-
-
-UPDATE NguoiDung
-SET matKhau = '$2a$10$8.UnVuG9HHgffUDAlk8qfOuVGkqRzgVymGe07xd00DMxs.TVuHOn2'
-WHERE matKhau = '123';
