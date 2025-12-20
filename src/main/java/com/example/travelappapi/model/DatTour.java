@@ -3,6 +3,8 @@ package com.example.travelappapi.model;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.hibernate.annotations.DynamicInsert;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Entity;
@@ -21,6 +23,7 @@ import lombok.ToString;
 @Entity
 @Data
 @NoArgsConstructor
+@DynamicInsert
 @AllArgsConstructor
 @Table(name = "DatTour")
 public class DatTour {
@@ -28,15 +31,11 @@ public class DatTour {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer maDatTour;
-
     private Integer soNguoiLon;
     private Integer soTreEm;
-
     private Double tongTien;
-
     private String trangThaiDatTour;
     private String trangThaiThanhToan;
-
     private LocalDateTime ngayDat;
     private LocalDateTime ngayHuy;
     private String lyDoHuy;

@@ -1,5 +1,7 @@
 package com.example.travelappapi.model;
 
+import org.hibernate.annotations.DynamicInsert;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -15,6 +17,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@DynamicInsert
 @Table(name = "HinhAnhTour")
 public class HinhAnhTour {
 

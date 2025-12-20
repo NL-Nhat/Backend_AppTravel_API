@@ -1,6 +1,9 @@
 package com.example.travelappapi.model;
 
 import java.time.LocalDateTime;
+
+import org.hibernate.annotations.DynamicInsert;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -16,6 +19,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@DynamicInsert
 @Table(name = "DanhGia")
 public class DanhGia {
 
