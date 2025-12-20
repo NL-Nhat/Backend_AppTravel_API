@@ -104,7 +104,7 @@ CREATE TABLE DatTour (
 
 CREATE TABLE ThanhToan (
     maThanhToan INT IDENTITY(1,1) PRIMARY KEY,
-    maDatTour INT NOT NULL,
+    maDatTour INT NOT NULL unique,
     phuongThucThanhToan NVARCHAR(20) NOT NULL CHECK (phuongThucThanhToan IN ('ChuyenKhoan', 'TheTinDung', 'ViDienTu')),
     soTien DECIMAL(18,2) NOT NULL CHECK (soTien > 0),
     ngayThanhToan DATETIME DEFAULT GETDATE(),
@@ -120,7 +120,7 @@ CREATE TABLE DanhGia (
     binhLuan NVARCHAR(max),
     thoiGianTao DATETIME DEFAULT GETDATE(),
     
-    CONSTRAINT FK_DanhGia_Tour FOREIGN KEY (maTour) REFERENCES Tour(maTour),
+    CONSTRAINT FK_DanhGia_Tour FOREIGN KEY (maTour) REFERENCES Tour(maTour) on delete CASCADE,
     CONSTRAINT FK_DanhGia_NguoiDung FOREIGN KEY (maNguoiDung) REFERENCES NguoiDung(maNguoiDung)
 );
 
@@ -415,7 +415,7 @@ INSERT INTO ThanhToan (maDatTour, phuongThucThanhToan, soTien, ngayThanhToan) VA
 (17, N'ViDienTu', 1700000, '2025-11-29 10:05:00'),
 (19, N'ChuyenKhoan', 7600000, '2025-11-15 12:15:00'),
 (20, N'ChuyenKhoan', 18000000, '2025-11-30 08:10:00'),
-(1, N'ChuyenKhoan', 100000, '2025-11-20 09:00:00');
+(2, N'ChuyenKhoan', 100000, '2025-11-20 09:00:00');
 GO
 
 -- BẢNG 8: DANHGIA (20 Reviews)
@@ -575,6 +575,7 @@ GO
 Exec sp_LayHoatDongGanDay
 
 
+
 select *from NguoiDung
 select *from Tour
 select *from LichKhoiHanh
@@ -675,3 +676,5 @@ SELECT TOP 50 *
 FROM DatTour
 WHERE maNguoiDung = @MaNguoiDung
 ORDER BY ngayDat DESC;
+select *from DatTour
+select *from KhachHangThamGia

@@ -32,4 +32,5 @@ public interface DatTourRepository extends JpaRepository<DatTour, Integer> {
             """)
     List<DatTour> searchBookingsForAdmin(@org.springframework.data.repository.query.Param("status") String status,
                                         @org.springframework.data.repository.query.Param("q") String q);
+
 }

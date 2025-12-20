@@ -4,10 +4,11 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data 
-@AllArgsConstructor
+@Data
 @NoArgsConstructor
-public class LoginRequest {
-    private String tenDangNhap;
-    private String matKhau;
+@AllArgsConstructor
+public class BookingResponseDTO {
+
+    private int maDatTour;
+    private String message;
 }
