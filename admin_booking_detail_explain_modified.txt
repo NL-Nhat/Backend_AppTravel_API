@@ -1,0 +1,152 @@
+GIẢI THÍCH CHỨC NĂNG (ADMIN) - XEM CHI TIẾT ĐƠN ĐẶT TOUR
+=====================================================
+
+1) Mục tiêu
+-----------
+Chức năng “Xem chi tiết đơn đặt tour” cho Admin cho phép quản trị viên truy xuất thông tin đầy đủ của 1 booking (DatTour)
+bao gồm:
+- Thông tin đơn đặt: mã đặt tour, số người lớn/trẻ em, tổng tiền, trạng thái đặt tour, trạng thái thanh toán, ngày đặt.
+- Thông tin hủy (nếu có): ngày hủy, lý do hủy.
+- Thông tin lịch khởi hành: mã lịch khởi hành, ngày khởi hành, ngày kết thúc.
+- Thông tin tour: mã tour, tên tour, địa điểm (thành phố/điểm đến), url hình ảnh chính.
+- Thông tin khách hàng: mã người dùng, họ tên, email, số điện thoại, ảnh đại diện.
+
+2) API liên quan
+---------------
+2.1) Endpoint xem chi tiết
+- Method: GET
+- URL: /api/admin/bookings/{maDatTour}
+- Quyền: chỉ Admin (ROLE_Admin)
+- Response: 1 object AdminBookingItemDTO
+
+2.2) Các endpoint admin bookings khác (liên quan module)
+- GET  /api/admin/bookings?status=&q=    (list + filter + search)
+- POST /api/admin/bookings/{maDatTour}/confirm
+- POST /api/admin/bookings/{maDatTour}/cancel   (body: { "lyDoHuy": "..." })
+
+3) Luồng xử lý backend cho “Xem chi tiết” (Request -> Response)
+-------------------------------------------------------------
+Bước A - Routing / Controller
+File: src/main/java/com/example/travelappapi/controller/AdminBookingController.java
+- Controller mapping: @RequestMapping("/api/admin/bookings")
+- Method:
+  @GetMapping("/{maDatTour}")
+  public ResponseEntity<AdminBookingItemDTO> getBookingDetail(@PathVariable Integer maDatTour)
+
+Khi admin gọi GET /api/admin/bookings/{maDatTour}, controller sẽ chuyển sang service:
+  datTourService.getBookingDetailForAdmin(maDatTour)
+
+Bước B - Service
+File: src/main/java/com/example/travelappapi/service/DatTourService.java
+Method:
+- public AdminBookingItemDTO getBookingDetailForAdmin(Integer maDatTour)
+
+Logic:
+1) Tìm DatTour theo id:
+   datTourRepository.findById(maDatTour)
+2) Nếu không tìm thấy -> trả 404 NOT_FOUND:
+   throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy đơn đặt tour")
+3) Nếu có dữ liệu -> map entity DatTour sang DTO dùng toAdminDto(dt)
+
+Bước C - Mapping dữ liệu sang DTO
+File: DatTourService.java
+Method:
+- private AdminBookingItemDTO toAdminDto(DatTour dt)
+
+Trong mapping:
+- Lấy LichKhoiHanh (dt.getLichKhoiHanh()) và Tour (lkh.getTour()) nếu có
+- Lấy NguoiDung (dt.getNguoiDung()) nếu có
+- Tính trường diaDiem bằng resolveDiaDiem(tour):
+  - Ưu tiên tour.diemDen.thanhPho
+  - Nếu thanhPho null/blank -> fallback tour.diemDen.tenDiemDen
+
+Kết quả trả về là AdminBookingItemDTO gồm cả:
+- dữ liệu booking
+- dữ liệu tour / lịch khởi hành
+- dữ liệu khách hàng
+
+Bước D - Response
+- ResponseEntity.ok(dto)
+- JSON trả về tương ứng với các field của AdminBookingItemDTO.
+
+4) Phân quyền / bảo mật
+----------------------
+Có 2 lớp bảo vệ:
+A) Global SecurityFilterChain
+File: src/main/java/com/example/travelappapi/config/SecurityConfig.java
+- Rule mới: .requestMatchers("/api/admin/**").hasRole("Admin")
+=> Tất cả endpoint /api/admin/** yêu cầu user có ROLE_Admin.
+
+B) Method security
+File: AdminBookingController.java
+- @PreAuthorize("hasRole('Admin')") trên class
+=> Bảo vệ thêm ở mức method-level (đã bật @EnableMethodSecurity).
+
+Lưu ý:
+- Nếu thiếu/không hợp lệ JWT -> 401 Unauthorized
+- Nếu JWT hợp lệ nhưng không có role Admin -> 403 Forbidden
+
+5) Các thay đổi code mới (MODIFIED) liên quan module Admin quản lý đặt tour
+---------------------------------------------------------------------------
+Dựa trên trạng thái workspace hiện tại (có file mới + file đã sửa), phần quản lý đặt tour của Admin đã được thêm/sửa như sau:
+
+(1) [NEW] AdminBookingController
+File mới: src/main/java/com/example/travelappapi/controller/AdminBookingController.java
+- Thêm module API /api/admin/bookings
+- Có endpoint xem chi tiết: GET /{maDatTour}
+- Kèm thêm list, confirm, cancel để hoàn chỉnh workflow admin
+
+(2) [NEW] AdminBookingItemDTO
+File mới: src/main/java/com/example/travelappapi/dto/AdminBookingItemDTO.java
+- DTO tổng hợp thông tin booking + lịch khởi hành + tour + khách hàng
+- Dùng cho cả list và detail (vì list cần hiển thị nhanh thông tin khách + tour)
+
+(3) [MODIFIED] DatTourService
+File: src/main/java/com/example/travelappapi/service/DatTourService.java
+- Bổ sung các method phục vụ admin:
+  - getBookingsForAdmin(status, q)
+  - getBookingDetailForAdmin(maDatTour)
+  - confirmBookingAsAdmin(maDatTour)
+  - cancelBookingAsAdmin(maDatTour, lyDoHuy)
+- Bổ sung mapper toAdminDto(dt)
+- Tách resolveDiaDiem(tour) để dùng chung cho DTO user (DatTourHistoryItemDTO) và DTO admin
+
+(4) [MODIFIED] DatTourRepository
+File: src/main/java/com/example/travelappapi/repository/DatTourRepository.java
+- Thêm query searchBookingsForAdmin(status, q)
+  - join DatTour -> NguoiDung
+  - left join -> LichKhoiHanh -> Tour
+  - filter theo status (nullable)
+  - search theo q (nullable): họ tên/email/sđt/tên tour/mã đặt tour
+  - order by ngày đặt desc
+
+(5) [MODIFIED] SecurityConfig
+File: src/main/java/com/example/travelappapi/config/SecurityConfig.java
+- Thay đổi quan trọng:
+  - Trước: /api/admin/** có thể permitAll (không cần đăng nhập)
+  - Sau: /api/admin/** bắt buộc hasRole("Admin")
+=> Đây là thay đổi bảo mật quan trọng để module admin bookings không bị truy cập công khai.
+
+(6) [NEW] Tài liệu test Postman (hỗ trợ dev/test)
+File mới: postman_test_admin_bookings.txt
+- Hướng dẫn test đầy đủ các endpoint admin bookings (list/detail/confirm/cancel)
+
+6) Các tình huống lỗi (để UI Admin xử lý)
+----------------------------------------
+- 404 NOT_FOUND: maDatTour không tồn tại.
+- 401 Unauthorized: thiếu token/ token hết hạn.
+- 403 Forbidden: không có role Admin.
+
+Gợi ý thêm cho UI:
+- Khi user bấm “Xem chi tiết”, gọi GET /api/admin/bookings/{maDatTour}.
+- Nếu cần hiển thị lý do hủy: đọc lyDoHuy, ngayHuy.
+
+7) File/điểm cần chú ý nếu muốn mở rộng “Xem chi tiết” sâu hơn
+--------------------------------------------------------------
+Hiện tại API detail trả về AdminBookingItemDTO (tập trung vào booking + tour + khách).
+Nếu muốn hiển thị thêm danh sách khách tham gia (KhachHangThamGia) hoặc thanh toán (ThanhToan), cần:
+- Tạo DTO detail riêng (vd: AdminBookingDetailDTO) chứa thêm list
+- Eager fetch / query join fetch phù hợp (hoặc mapping thủ công)
+- Tránh vấn đề lazy loading khi serialize.
+
+(End)

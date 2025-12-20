@@ -12,4 +12,24 @@ public interface DatTourRepository extends JpaRepository<DatTour, Integer> {
     List<DatTour> findByNguoiDung_MaNguoiDungOrderByNgayDatDesc(Integer maNguoiDung);
 
     List<DatTour> findByNguoiDung_MaNguoiDungAndTrangThaiDatTourOrderByNgayDatDesc(Integer maNguoiDung, String trangThaiDatTour);
+
+    // Admin queries
+    @org.springframework.data.jpa.repository.Query("""
+            select dt from DatTour dt
+            join dt.nguoiDung nd
+            left join dt.lichKhoiHanh lkh
+            left join lkh.tour t
+            where (:status is null or :status = '' or lower(dt.trangThaiDatTour) = lower(:status))
+              and (
+                :q is null or :q = ''
+                or lower(nd.hoTen) like lower(concat('%', :q, '%'))
+                or lower(nd.email) like lower(concat('%', :q, '%'))
+                or lower(nd.soDienThoai) like lower(concat('%', :q, '%'))
+                or lower(t.tenTour) like lower(concat('%', :q, '%'))
+                or concat('', dt.maDatTour) like concat('%', :q, '%')
+              )
+            order by dt.ngayDat desc
+            """)
+    List<DatTour> searchBookingsForAdmin(@org.springframework.data.repository.query.Param("status") String status,
+                                        @org.springframework.data.repository.query.Param("q") String q);
 }

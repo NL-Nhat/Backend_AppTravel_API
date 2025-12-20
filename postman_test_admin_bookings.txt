@@ -1,0 +1,187 @@
+HƯỚNG DẪN TEST API ADMIN QUẢN LÝ ĐẶT TOUR BẰNG POSTMAN
+=====================================================
+
+1) Chuẩn bị
+-----------
+- Chạy backend (Spring Boot):
+  - Cách 1: ./mvnw spring-boot:run
+  - Cách 2: Run class com.example.travelappapi.TravelAppApiApplication
+
+- Base URL (tuỳ môi trường):
+  http://localhost:8080
+
+- Lưu ý phân quyền:
+  - Các API dưới /api/admin/** yêu cầu JWT hợp lệ và user có role Admin.
+  - Backend đang dùng hasRole("Admin"). Nghĩa là trong JWT/user authorities phải có ROLE_Admin.
+
+
+2) Đăng nhập lấy JWT (Admin)
+----------------------------
+Request:
+- Method: POST
+- URL: {{baseUrl}}/api/auth/login
+- Headers: Content-Type: application/json
+- Body (raw JSON) ví dụ:
+{
+  "email": "admin@example.com",
+  "matKhau": "123456"
+}
+
+Response mong đợi (tuỳ implement LoginResponse):
+{
+  "token": "<JWT_TOKEN>",
+  ...
+}
+
+=> Copy token vào biến Postman:
+- Tạo Environment variables:
+  - baseUrl = http://localhost:8080
+  - token = <JWT_TOKEN>
+
+=> Hoặc set Authorization cho từng request:
+- Tab Authorization
+- Type: Bearer Token
+- Token: {{token}}
+
+
+3) API Admin Bookings
+---------------------
+Base path: {{baseUrl}}/api/admin/bookings
+
+3.1) List bookings (có lọc)
+---------------------------
+Request:
+- Method: GET
+- URL: {{baseUrl}}/api/admin/bookings
+- Authorization: Bearer {{token}}
+- Query Params (optional):
+  - status: ChoXacNhan | DaXacNhan | DaHuy
+  - q: text search (maDatTour, tenTour, hoTen, email, soDienThoai)
+
+Ví dụ:
+- Lấy tất cả:
+  GET {{baseUrl}}/api/admin/bookings
+
+- Lấy đơn chờ xác nhận:
+  GET {{baseUrl}}/api/admin/bookings?status=ChoXacNhan
+
+- Tìm theo SĐT / tên / mã đơn:
+  GET {{baseUrl}}/api/admin/bookings?q=090
+  GET {{baseUrl}}/api/admin/bookings?q=Nguyen
+  GET {{baseUrl}}/api/admin/bookings?q=12
+
+Response: mảng AdminBookingItemDTO.
+Một item có thể giống:
+{
+  "maDatTour": 12,
+  "soNguoiLon": 2,
+  "soTreEm": 1,
+  "tongTien": 3500000,
+  "trangThaiDatTour": "ChoXacNhan",
+  "trangThaiThanhToan": "ChuaThanhToan",
+  "ngayDat": "2025-12-20T10:30:00",
+  "ngayHuy": null,
+  "lyDoHuy": null,
+  "maLichKhoiHanh": 5,
+  "ngayKhoiHanh": "2026-01-15T00:00:00",
+  "ngayKetThuc": "2026-01-18T00:00:00",
+  "maTour": 3,
+  "tenTour": "Tour Đà Nẵng",
+  "diaDiem": "Đà Nẵng",
+  "urlHinhAnhChinh": "tour_danang.jpg",
+  "maNguoiDung": 7,
+  "hoTen": "Nguyễn Văn A",
+  "email": "a@gmail.com",
+  "soDienThoai": "090xxxxxxx",
+  "anhDaiDien": "avatar_a.jpg"
+}
+
+
+3.2) Xem chi tiết booking
+-------------------------
+Request:
+- Method: GET
+- URL: {{baseUrl}}/api/admin/bookings/{maDatTour}
+- Authorization: Bearer {{token}}
+
+Ví dụ:
+GET {{baseUrl}}/api/admin/bookings/12
+
+Response: 1 object AdminBookingItemDTO.
+
+
+3.3) Confirm (duyệt) booking
+----------------------------
+Request:
+- Method: POST
+- URL: {{baseUrl}}/api/admin/bookings/{maDatTour}/confirm
+- Authorization: Bearer {{token}}
+- Body: none
+
+Ví dụ:
+POST {{baseUrl}}/api/admin/bookings/12/confirm
+
+Rule:
+- Chỉ confirm được nếu trangThaiDatTour hiện tại = ChoXacNhan.
+- Nếu trạng thái khác sẽ trả 400 với message phù hợp.
+
+Test nhanh:
+- Gọi list pending để lấy maDatTour
+- Confirm
+- Gọi lại detail/list để kiểm tra trangThaiDatTour -> DaXacNhan
+
+
+3.4) Cancel booking (Admin huỷ)
+-------------------------------
+Request:
+- Method: POST
+- URL: {{baseUrl}}/api/admin/bookings/{maDatTour}/cancel
+- Authorization: Bearer {{token}}
+- Headers: Content-Type: application/json
+- Body (raw JSON):
+{
+  "lyDoHuy": "Khách yêu cầu huỷ / hết chỗ / ..."
+}
+
+Ví dụ:
+POST {{baseUrl}}/api/admin/bookings/12/cancel
+Body:
+{
+  "lyDoHuy": "Admin huỷ do quá thời hạn thanh toán"
+}
+
+Test nhanh:
+- Cancel
+- Gọi lại detail/list để kiểm tra:
+  - trangThaiDatTour -> DaHuy
+  - ngayHuy != null
+  - lyDoHuy đúng
+
+
+4) Troubleshooting
+------------------
+- 401 Unauthorized:
+  - Chưa set Bearer token hoặc token hết hạn.
+
+- 403 Forbidden:
+  - User không có role Admin (cần ROLE_Admin).
+
+- 404 Not Found:
+  - maDatTour không tồn tại.
+
+- 400 Bad Request khi confirm:
+  - Đơn không ở trạng thái ChoXacNhan.
+
+
+5) Gợi ý tạo Postman Collection
+-------------------------------
+- Tạo Collection: "AppTravel Admin Bookings"
+- Tạo Environment: "local"
+  - baseUrl
+  - token
+- Add requests:
+  1) Auth - Login
+  2) Admin - Bookings - List
+  3) Admin - Bookings - Detail
+  4) Admin - Bookings - Confirm
+  5) Admin - Bookings - Cancel
