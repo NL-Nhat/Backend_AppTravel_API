@@ -578,3 +578,100 @@ Exec sp_LayHoatDongGanDay
 select *from NguoiDung
 select *from Tour
 select *from LichKhoiHanh
+
+
+-- ====================================================
+-- SEED BỔ SUNG (append): DatTour cho user tenDangNhap = 'user'
+-- Mục đích: tạo dữ liệu test lịch sử đặt tour cho tài khoản user/12345
+-- ====================================================
+
+-- SEED TEST: Thêm dữ liệu DatTour cho user tenDangNhap = 'user'
+-- Mục đích: tạo dữ liệu để test chức năng "Lịch sử đặt tour của user"
+
+USE dbAppTravel;
+GO
+
+DECLARE @TenDangNhap NVARCHAR(50) = N'user';
+DECLARE @MaNguoiDung INT;
+
+SELECT @MaNguoiDung = maNguoiDung
+FROM NguoiDung
+WHERE tenDangNhap = @TenDangNhap;
+
+IF @MaNguoiDung IS NULL
+BEGIN
+    RAISERROR (N'Không tìm thấy user với tenDangNhap = %s. Hãy chạy Backend rồi vào chạy lại đoạn SEED này. vì user được tạo ra khi chạy backend chứ không phải insert sql', 16, 1, @TenDangNhap);
+    RETURN;
+END
+
+-- Lấy 3 lịch khởi hành để gắn vào 3 booking mẫu
+DECLARE @L1 INT, @L2 INT, @L3 INT;
+
+;WITH L AS (
+    SELECT TOP 3 maLichKhoiHanh
+    FROM LichKhoiHanh
+    ORDER BY maLichKhoiHanh ASC
+)
+SELECT
+    @L1 = MAX(CASE WHEN rn = 1 THEN maLichKhoiHanh END),
+    @L2 = MAX(CASE WHEN rn = 2 THEN maLichKhoiHanh END),
+    @L3 = MAX(CASE WHEN rn = 3 THEN maLichKhoiHanh END)
+FROM (
+    SELECT maLichKhoiHanh, ROW_NUMBER() OVER (ORDER BY maLichKhoiHanh) rn
+    FROM L
+) x;
+
+-- Fallback nếu DB ít lịch
+IF @L1 IS NULL
+BEGIN
+    RAISERROR (N'Không có dữ liệu LichKhoiHanh để tạo DatTour. Hãy seed LichKhoiHanh trước.', 16, 1);
+    RETURN;
+END
+IF @L2 IS NULL SET @L2 = @L1;
+IF @L3 IS NULL SET @L3 = @L1;
+
+BEGIN TRAN;
+
+-- 1) Booking CHỜ XÁC NHẬN
+IF NOT EXISTS (
+    SELECT 1 FROM DatTour
+    WHERE maNguoiDung = @MaNguoiDung
+      AND maLichKhoiHanh = @L1
+      AND trangThaiDatTour = N'ChoXacNhan'
+)
+BEGIN
+    INSERT INTO DatTour (maNguoiDung, maLichKhoiHanh, soNguoiLon, soTreEm, tongTien, trangThaiDatTour, trangThaiThanhToan, ngayDat, ngayHuy, lyDoHuy)
+    VALUES (@MaNguoiDung, @L1, 2, 0, 2000000, N'ChoXacNhan', N'ChuaThanhToan', DATEADD(day, -1, GETDATE()), NULL, NULL);
+END
+
+-- 2) Booking ĐÃ XÁC NHẬN
+IF NOT EXISTS (
+    SELECT 1 FROM DatTour
+    WHERE maNguoiDung = @MaNguoiDung
+      AND maLichKhoiHanh = @L2
+      AND trangThaiDatTour = N'DaXacNhan'
+)
+BEGIN
+    INSERT INTO DatTour (maNguoiDung, maLichKhoiHanh, soNguoiLon, soTreEm, tongTien, trangThaiDatTour, trangThaiThanhToan, ngayDat, ngayHuy, lyDoHuy)
+    VALUES (@MaNguoiDung, @L2, 2, 1, 3500000, N'DaXacNhan', N'DaThanhToan', DATEADD(day, -7, GETDATE()), NULL, NULL);
+END
+
+-- 3) Booking ĐÃ HỦY
+IF NOT EXISTS (
+    SELECT 1 FROM DatTour
+    WHERE maNguoiDung = @MaNguoiDung
+      AND maLichKhoiHanh = @L3
+      AND trangThaiDatTour = N'DaHuy'
+)
+BEGIN
+    INSERT INTO DatTour (maNguoiDung, maLichKhoiHanh, soNguoiLon, soTreEm, tongTien, trangThaiDatTour, trangThaiThanhToan, ngayDat, ngayHuy, lyDoHuy)
+    VALUES (@MaNguoiDung, @L3, 1, 0, 1250000, N'DaHuy', N'ChuaThanhToan', DATEADD(day, -3, GETDATE()), DATEADD(day, -2, GETDATE()), N'Test: hủy để kiểm tra tab Đã hủy');
+END
+
+COMMIT TRAN;
+
+-- Kiểm tra lại dữ liệu vừa seed
+SELECT TOP 50 *
+FROM DatTour
+WHERE maNguoiDung = @MaNguoiDung
+ORDER BY ngayDat DESC;
