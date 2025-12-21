@@ -12,6 +12,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
@@ -33,6 +34,7 @@ public class NguoiDung implements UserDetails{
     private String soDienThoai;
     private String diaChi;
 
+    @JsonFormat(pattern = "dd/MM/yyyy")
     private LocalDate ngaySinh;
 
     private String gioiTinh;

@@ -50,13 +50,21 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
         .csrf(csrf -> csrf.disable())
+        .cors(cors -> cors.configurationSource(request -> {
+            org.springframework.web.cors.CorsConfiguration config = new org.springframework.web.cors.CorsConfiguration();
+            config.setAllowedOrigins(java.util.List.of("*"));
+            config.setAllowedMethods(java.util.List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+            config.setAllowedHeaders(java.util.List.of("*"));
+            return config;
+        }))
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authenticationProvider(authenticationProvider())
         .authorizeHttpRequests(auth -> auth
             // Khu vực công khai: Đăng nhập và xem danh sách Tour
-            .requestMatchers("/api/auth/**").permitAll()
-            .requestMatchers("/avatar/**").permitAll()
+             .requestMatchers("/avatar/**").permitAll()
             .requestMatchers("/tour/**").permitAll()
+            .requestMatchers(HttpMethod.PUT, "/api/auth/user/**").permitAll()
+            .requestMatchers("/api/auth/**").permitAll()
             .requestMatchers("/api/address/**").permitAll()
             .requestMatchers(HttpMethod.GET, "/api/tour/**", "/api/diem-den/**").permitAll()
             .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
