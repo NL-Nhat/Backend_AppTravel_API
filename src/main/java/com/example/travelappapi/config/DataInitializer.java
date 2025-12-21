@@ -40,7 +40,10 @@ public class DataInitializer implements CommandLineRunner {
             admin.setAnhDaiDien("anhdaidien.jpg");
 
             nguoiDungRepository.save(admin);
+            //System.out.println(passwordEncoder.encode("12345"));
+
             System.out.println(">>> [DataInitializer] Đã tạo tài khoản ADMIN mặc định: admin / 12345");
+            
         }
 
         // 2. Tạo tài khoản Khách hàng mẫu
