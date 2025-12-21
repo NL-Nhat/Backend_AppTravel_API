@@ -5,12 +5,17 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.travelappapi.dto.BookingRequestDTO;
 import com.example.travelappapi.dto.BookingResponseDTO;
+import com.example.travelappapi.dto.ViDienTuResponse;
 import com.example.travelappapi.service.BookingService;
 
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+
 
 
 @RestController
@@ -22,6 +27,14 @@ public class BookingController {
     public BookingController(BookingService bookingService) {
         this.bookingService = bookingService;
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getMethodName(@PathVariable int id) {
+        ViDienTuResponse viDienTuResponse = new ViDienTuResponse();
+        viDienTuResponse = bookingService.layThongTin(id);
+        return ResponseEntity.ok(viDienTuResponse);
+    }
+    
 
     @PostMapping("/create")
     public ResponseEntity<?> createBooking(@RequestBody BookingRequestDTO request) {
