@@ -24,7 +24,34 @@ public class AuthController {
 
     @Autowired
     private AuthenticationManager authenticationManager;
+@Autowired
+private com.example.travelappapi.repository.NguoiDungRepository nguoiDungRepository;
 
+@Autowired
+private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
+
+@PostMapping("/register")
+public ResponseEntity<?> register(@RequestBody com.example.travelappapi.dto.RegisterRequest request) {
+    // 1. Kiểm tra trùng tên đăng nhập
+    if (nguoiDungRepository.existsByTenDangNhap(request.getTenDangNhap())) {
+        return ResponseEntity.status(400).body("Tên đăng nhập đã tồn tại!");
+    }
+
+    // 2. Tạo đối tượng người dùng mới
+    NguoiDung user = new NguoiDung();
+    user.setTenDangNhap(request.getTenDangNhap());
+    user.setMatKhau(passwordEncoder.encode(request.getMatKhau())); // Mã hóa mật khẩu bảo mật
+    user.setHoTen(request.getHoTen());
+    user.setEmail(request.getEmail());
+    user.setSoDienThoai(request.getSoDienThoai());
+    user.setVaiTro("KhachHang"); // Mặc định tài khoản mới là người dùng
+    user.setTrangThai("HoatDong"); // Mặc định tài khoản mới là hoạt động
+
+    // 3. Lưu vào DB
+    nguoiDungRepository.save(user);
+
+    return ResponseEntity.ok("Đăng ký thành công!");
+}
     @Autowired
     private JwtTokenProvider tokenProvider;
 
@@ -66,6 +93,7 @@ public class AuthController {
             return ResponseEntity.status(401)
                     .body("Tên đăng nhập hoặc mật khẩu không đúng");
         }
+    
     }
 
     @Autowired
