@@ -62,9 +62,11 @@ public class SecurityConfig {
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authenticationProvider(authenticationProvider())
         .authorizeHttpRequests(auth -> auth
-            // Mở hoàn toàn các API liên quan đến Authentication
+            // Khu vực công khai: Đăng nhập và xem danh sách Tour
+             .requestMatchers("/avatar/**").permitAll()
+            .requestMatchers("/tour/**").permitAll()
+            .requestMatchers(HttpMethod.PUT, "/api/auth/user/**").permitAll()
             .requestMatchers("/api/auth/**").permitAll()
-            .requestMatchers("/avatar/**", "/tour/**", "/uploads/**").permitAll() // Cho phép truy cập công khai đến các tài nguyên tĩnh
             .requestMatchers("/api/address/**").permitAll()
             .requestMatchers(HttpMethod.GET, "/api/tour/**", "/api/diem-den/**").permitAll()
             .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
