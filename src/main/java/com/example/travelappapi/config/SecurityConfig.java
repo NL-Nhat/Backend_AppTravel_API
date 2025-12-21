@@ -57,11 +57,13 @@ public class SecurityConfig {
             .requestMatchers("/api/auth/**").permitAll()
             .requestMatchers("/avatar/**").permitAll()
             .requestMatchers("/tour/**").permitAll()
+            .requestMatchers("/api/address/**").permitAll()
             .requestMatchers(HttpMethod.GET, "/api/tour/**", "/api/diem-den/**").permitAll()
             .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
+            //.requestMatchers("/api/bookings/**").permitAll()
 
             // Khu vực dành riêng cho Quản trị viên
-            .requestMatchers("/api/admin/**").permitAll()
+            .requestMatchers("/api/admin/**").hasRole("Admin")
 
             // Các khu vực còn lại yêu cầu phải đăng nhập
             .anyRequest().authenticated()
