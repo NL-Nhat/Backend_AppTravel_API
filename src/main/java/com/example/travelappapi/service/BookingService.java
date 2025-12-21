@@ -1,9 +1,12 @@
 package com.example.travelappapi.service;
 
+import java.time.LocalDateTime;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import com.example.travelappapi.dto.BookingRequestDTO;
+import com.example.travelappapi.dto.ViDienTuResponse;
 import com.example.travelappapi.model.DatTour;
 import com.example.travelappapi.model.KhachHangThamGia;
 import com.example.travelappapi.model.LichKhoiHanh;
@@ -13,6 +16,7 @@ import com.example.travelappapi.repository.DatTourRepository;
 import com.example.travelappapi.repository.KhachHangThamGiaRepository;
 import com.example.travelappapi.repository.LichKhoiHanhRepository;
 import com.example.travelappapi.repository.NguoiDungRepository;
+import com.example.travelappapi.repository.TourRepository;
 
 import jakarta.transaction.Transactional;
 
@@ -23,12 +27,14 @@ public class BookingService {
     private final DatTourRepository datTourRepository;
     private final LichKhoiHanhRepository lichRepository;
     private final NguoiDungRepository nguoiDungRepository;
+    private final TourRepository tourRepository;
 
-    public BookingService(KhachHangThamGiaRepository khRepo, DatTourRepository datTourRepo, LichKhoiHanhRepository lichRepo, NguoiDungRepository nguoiDungRepo) {
+    public BookingService(KhachHangThamGiaRepository khRepo, DatTourRepository datTourRepo, LichKhoiHanhRepository lichRepo, NguoiDungRepository nguoiDungRepo, TourRepository tourRepository) {
         this.datTourRepository = datTourRepo;
         this.khRepository = khRepo;
         this.lichRepository = lichRepo;
         this.nguoiDungRepository = nguoiDungRepo;
+        this.tourRepository = tourRepository;
     }
 
     @Transactional //kích hoạt roolback nếu bi lỗi
@@ -63,5 +69,32 @@ public class BookingService {
         khRepository.save(khachHangThamGia);
 
         return saveBooking.getMaDatTour();
+    }
+
+    public ViDienTuResponse layThongTin(int maDatTour) {
+        ViDienTuResponse viDienTuResponse = new ViDienTuResponse();
+
+        DatTour datTour = datTourRepository.findById(maDatTour)
+        .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn đặt tour"));
+
+        NguoiDung nguoiDung = new NguoiDung();
+        nguoiDung = datTour.getNguoiDung();
+
+        LichKhoiHanh lichKhoiHanh = datTour.getLichKhoiHanh();
+        Tour tour = lichKhoiHanh.getTour();
+        
+        LocalDateTime ngayDi = lichKhoiHanh.getNgayKhoiHanh();
+        String tenTour = tour.getTenTour();
+        int soNguoiLon = datTour.getSoNguoiLon();
+        int soTreEm = datTour.getSoTreEm();
+
+        viDienTuResponse.setNgayDi(ngayDi);
+        viDienTuResponse.setSoNguoiLon(soNguoiLon);
+        viDienTuResponse.setSoTreEm(soTreEm);
+        viDienTuResponse.setTentour(tenTour);
+        viDienTuResponse.setTenKhachHang(nguoiDung.getHoTen());
+        viDienTuResponse.setTrangThaiThanhToan(datTour.getTrangThaiThanhToan());
+
+        return viDienTuResponse;
     }
 }

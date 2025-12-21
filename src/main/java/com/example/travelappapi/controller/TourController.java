@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.travelappapi.model.Tour;
 import com.example.travelappapi.service.TourService;
 
+
 @RestController
 @RequestMapping("api/tour")
 public class TourController {
@@ -51,5 +52,5 @@ public class TourController {
     public ResponseEntity<?> getDanhGia(@PathVariable int id) {
         return ResponseEntity.ok(tourService.getDanhGiaByTourId(id));
     }
-
+    
 }
