@@ -107,7 +107,7 @@ CREATE TABLE ThanhToan (
     maDatTour INT NOT NULL unique,
     phuongThucThanhToan NVARCHAR(20) NOT NULL CHECK (phuongThucThanhToan IN ('ChuyenKhoan', 'TheTinDung', 'ViDienTu')),
     soTien DECIMAL(18,2) NOT NULL CHECK (soTien > 0),
-    ngayThanhToan DATETIME DEFAULT GETDATE(),
+    ngayThanhToan DATETIME not null DEFAULT GETDATE(),
     
     CONSTRAINT FK_ThanhToan_DatTour FOREIGN KEY (maDatTour) REFERENCES DatTour(maDatTour)
 );
@@ -579,6 +579,8 @@ Exec sp_LayHoatDongGanDay
 select *from NguoiDung
 select *from Tour
 select *from LichKhoiHanh
+select *from DatTour
+select *from ThanhToan
 
 
 -- ====================================================
