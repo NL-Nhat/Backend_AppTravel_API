@@ -16,6 +16,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import com.example.travelappapi.service.AuthService;
+import org.springframework.web.cors.CorsConfiguration;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -35,7 +37,6 @@ public class SecurityConfig {
         return provider;
     }
 
-
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
         return authConfig.getAuthenticationManager();
@@ -50,26 +51,31 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
         .csrf(csrf -> csrf.disable())
+        // Thêm cấu hình CORS để tránh lỗi khi Android gọi API
+        .cors(cors -> cors.configurationSource(request -> {
+            CorsConfiguration config = new CorsConfiguration();
+            config.setAllowedOrigins(List.of("*")); // Cho phép mọi nguồn (bao gồm điện thoại/máy ảo Android)
+            config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+            config.setAllowedHeaders(List.of("*"));
+            return config;
+        }))
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authenticationProvider(authenticationProvider())
         .authorizeHttpRequests(auth -> auth
-            // Khu vực công khai: Đăng nhập và xem danh sách Tour
+            // Mở hoàn toàn các API liên quan đến Authentication
             .requestMatchers("/api/auth/**").permitAll()
-            .requestMatchers("/avatar/**").permitAll()
-            .requestMatchers("/tour/**").permitAll()
+            .requestMatchers("/avatar/**", "/tour/**", "/uploads/**").permitAll() // Cho phép truy cập công khai đến các tài nguyên tĩnh
             .requestMatchers("/api/address/**").permitAll()
             .requestMatchers(HttpMethod.GET, "/api/tour/**", "/api/diem-den/**").permitAll()
             .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
-            //.requestMatchers("/api/bookings/**").permitAll()
 
-            // Khu vực dành riêng cho Quản trị viên
-            .requestMatchers("/api/admin/**").hasRole("Admin")
+            // Sửa hasRole thành hasAnyAuthority để khớp chính xác với chữ "Admin" trong SQL
+            .requestMatchers("/api/admin/**").hasAnyAuthority("Admin", "ROLE_Admin")
 
-            // Các khu vực còn lại yêu cầu phải đăng nhập
             .anyRequest().authenticated()
         );
 
-    http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-    return http.build();
+        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        return http.build();
     }
 }
