@@ -96,9 +96,6 @@ public ResponseEntity<?> register(@RequestBody com.example.travelappapi.dto.Regi
     
     }
 
-    @Autowired
-    private com.example.travelappapi.repository.NguoiDungRepository nguoiDungRepository;
-
     @PutMapping("/user/{id}")
     public ResponseEntity<?> updateNguoiDung(@PathVariable Integer id, @RequestBody NguoiDung updateData) {
         return nguoiDungRepository.findById(id).map(user -> {
