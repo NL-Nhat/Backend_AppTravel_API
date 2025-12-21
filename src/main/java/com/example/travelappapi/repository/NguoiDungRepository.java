@@ -12,5 +12,6 @@ public interface NguoiDungRepository extends JpaRepository<NguoiDung, Integer> {
 
     // Spring Data JPA tự động tạo truy vấn tìm kiếm theo tên đăng nhập
     Optional<NguoiDung> findByTenDangNhap(String tenDangNhap);
-
+    // Thêm dòng này để kiểm tra trùng lặp cho đăng ký tài khoản
+    boolean existsByTenDangNhap(String tenDangNhap);
 }
