@@ -65,6 +65,7 @@ public class SecurityConfig {
             // Khu vực công khai: Đăng nhập và xem danh sách Tour
              .requestMatchers("/avatar/**").permitAll()
             .requestMatchers("/tour/**").permitAll()
+            .requestMatchers("/api/auth/uploadAnhDaiDien").permitAll()
             .requestMatchers(HttpMethod.PUT, "/api/auth/user/**").permitAll()
             .requestMatchers("/api/auth/**").permitAll()
             .requestMatchers("/api/address/**").permitAll()
