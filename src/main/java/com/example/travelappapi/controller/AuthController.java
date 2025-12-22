@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.travelappapi.config.JwtTokenProvider;
+import com.example.travelappapi.dto.ChangePasswordRequest;
 import com.example.travelappapi.dto.LoginRequest;
 import com.example.travelappapi.dto.LoginResponse;
 import com.example.travelappapi.model.NguoiDung;
@@ -120,23 +121,39 @@ public ResponseEntity<?> register(@RequestBody com.example.travelappapi.dto.Regi
         }).orElse(ResponseEntity.notFound().build());
     }
    @PostMapping("/uploadAnhDaiDien")
-public ResponseEntity<?> uploadAnhDaiDien(@RequestParam("file") MultipartFile file) {
-    try {
-        Path rootPath = Paths.get("uploads/avatar").toAbsolutePath().normalize();
-    
-        if (!Files.exists(rootPath)) {
-            Files.createDirectories(rootPath);
-        }
+    public ResponseEntity<?> uploadAnhDaiDien(@RequestParam("file") MultipartFile file) {
+        try {
+            Path rootPath = Paths.get("uploads/avatar").toAbsolutePath().normalize();
+        
+            if (!Files.exists(rootPath)) {
+                Files.createDirectories(rootPath);
+            }
 
-        String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
-        Path filePath = rootPath.resolve(fileName); 
-        
-        Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-        
-        return ResponseEntity.ok(Map.of("fileName", fileName));
-    } catch (Exception e) {
-        e.printStackTrace(); 
-        return ResponseEntity.status(500).body("Lỗi server: " + e.getMessage());
+            String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+            Path filePath = rootPath.resolve(fileName); 
+            
+            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+            
+            return ResponseEntity.ok(Map.of("fileName", fileName));
+        } catch (Exception e) {
+            e.printStackTrace(); 
+            return ResponseEntity.status(500).body("Lỗi server: " + e.getMessage());
+        }
     }
-} 
+    @PutMapping("/user/{id}/doiMatKhau")
+    public ResponseEntity<?> doiMatKhau(
+            @PathVariable Integer id,
+            @RequestBody ChangePasswordRequest request) {
+        return nguoiDungRepository.findById(id).map(user -> {
+            if (!passwordEncoder.matches(request.getOldPassword(), user.getMatKhau())) {
+                return ResponseEntity.status(400).body("Mật khẩu hiện tại không đúng");
+            }
+            if (request.getOldPassword().equals(request.getNewPassword())) {
+                return ResponseEntity.status(400).body("Mật khẩu mới không được trùng mật khẩu cũ");
+            }
+            user.setMatKhau(passwordEncoder.encode(request.getNewPassword()));
+            nguoiDungRepository.save(user);
+            return ResponseEntity.ok("Đổi mật khẩu thành công!");
+        }).orElse(ResponseEntity.status(404).body("Không tìm thấy người dùng"));
+    } 
 }
