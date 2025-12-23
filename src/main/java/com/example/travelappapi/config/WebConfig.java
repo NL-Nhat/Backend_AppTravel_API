@@ -9,17 +9,17 @@ import java.io.File;
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
-    @Override
-    public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // Lấy đường dẫn gốc của dự án (Linh hoạt cho cả Windows và Linux Render)
-        String rootPath = System.getProperty("user.dir");
+    // @Override
+    // public void addResourceHandlers(ResourceHandlerRegistry registry) {
+    //     // Lấy đường dẫn gốc của dự án (Linh hoạt cho cả Windows và Linux Render)
+    //     String rootPath = System.getProperty("user.dir");
         
-        // Đường dẫn đến thư mục chứa ảnh
-        String uploadPath = "file:" + rootPath + File.separator + "uploads" + File.separator + "avatar" + File.separator;
+    //     // Đường dẫn đến thư mục chứa ảnh
+    //     String uploadPath = "file:" + rootPath + File.separator + "uploads" + File.separator + "avatar" + File.separator;
 
-        // Ánh xạ URL /avatar/** vào thư mục vật lý uploads/avatar/
-        registry.addResourceHandler("/avatar/**")
-                .addResourceLocations(uploadPath)
-                .setCachePeriod(0); // Tắt cache để cập nhật ảnh ngay lập tức khi test
-    }
+    //     // Ánh xạ URL /avatar/** vào thư mục vật lý uploads/avatar/
+    //     registry.addResourceHandler("/avatar/**")
+    //             .addResourceLocations(uploadPath)
+    //             .setCachePeriod(0); // Tắt cache để cập nhật ảnh ngay lập tức khi test
+    // }
 }

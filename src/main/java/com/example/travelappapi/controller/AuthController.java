@@ -51,7 +51,6 @@ public ResponseEntity<?> register(@RequestBody com.example.travelappapi.dto.Regi
     user.setMatKhau(passwordEncoder.encode(request.getMatKhau())); // Mã hóa mật khẩu bảo mật
     user.setHoTen(request.getHoTen());
     user.setEmail(request.getEmail());
-    user.setSoDienThoai(request.getSoDienThoai());
     user.setVaiTro("KhachHang"); // Mặc định tài khoản mới là người dùng
     user.setTrangThai("HoatDong"); // Mặc định tài khoản mới là hoạt động
 

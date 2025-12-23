@@ -8,5 +8,4 @@ public class RegisterRequest {
     private String matKhau;
     private String hoTen;
     private String email;
-    private String soDienThoai;
 }
