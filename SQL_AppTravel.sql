@@ -28,7 +28,7 @@ CREATE TABLE NguoiDung (
     email NVARCHAR(100) NOT NULL UNIQUE,
     matKhau VARCHAR(255) NOT NULL,
     hoTen NVARCHAR(100) NOT NULL,
-    soDienThoai NVARCHAR(15) unique,
+    soDienThoai NVARCHAR(15),
     diaChi NVARCHAR(255),
     ngaySinh DATE,
     gioiTinh NVARCHAR(10) CHECK (gioiTinh IN ('Nam', 'Nu')),
