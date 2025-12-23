@@ -9,6 +9,7 @@ import com.example.travelappapi.model.DatTour;
 
 @Repository
 public interface DatTourRepository extends JpaRepository<DatTour, Integer> {
+
     List<DatTour> findByNguoiDung_MaNguoiDungOrderByNgayDatDesc(Integer maNguoiDung);
 
     List<DatTour> findByNguoiDung_MaNguoiDungAndTrangThaiDatTourOrderByNgayDatDesc(Integer maNguoiDung, String trangThaiDatTour);
