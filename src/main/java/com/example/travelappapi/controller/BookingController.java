@@ -7,8 +7,6 @@ import com.example.travelappapi.dto.BookingRequestDTO;
 import com.example.travelappapi.dto.BookingResponseDTO;
 import com.example.travelappapi.dto.ViDienTuResponse;
 import com.example.travelappapi.service.BookingService;
-
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
