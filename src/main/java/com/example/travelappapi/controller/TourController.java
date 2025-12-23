@@ -1,5 +1,6 @@
 package com.example.travelappapi.controller;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,6 +52,19 @@ public class TourController {
     @GetMapping("/{id}/danh-gia")
     public ResponseEntity<?> getDanhGia(@PathVariable int id) {
         return ResponseEntity.ok(tourService.getDanhGiaByTourId(id));
+    }
+
+    //Check đường dẫn ảnh
+    @GetMapping("/check-avatar")
+    public Map<String, Object> check() {
+        String root = System.getProperty("user.dir");
+        File file = new File(root + "/uploads/avatar/anhdaidien.jpg");
+
+        Map<String, Object> rs = new HashMap<>();
+        rs.put("root", root);
+        rs.put("exists", file.exists());
+        rs.put("path", file.getAbsolutePath());
+        return rs;
     }
     
 }
