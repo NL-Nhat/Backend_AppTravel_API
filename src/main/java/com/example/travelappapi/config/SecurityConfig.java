@@ -1,5 +1,6 @@
 package com.example.travelappapi.config;
 
+import com.example.travelappapi.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,7 +16,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import com.example.travelappapi.service.AuthService;
+import org.springframework.web.cors.CorsConfiguration;
+
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -24,17 +27,17 @@ public class SecurityConfig {
 
     @Autowired
     private JwtAuthenticationFilter jwtAuthenticationFilter;
+    
     @Autowired
     private AuthService authService;
 
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setUserDetailsService(authService);  
-        provider.setPasswordEncoder(passwordEncoder()); 
+        provider.setUserDetailsService(authService);
+        provider.setPasswordEncoder(passwordEncoder());
         return provider;
     }
-
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
@@ -49,27 +52,32 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-        .csrf(csrf -> csrf.disable())
-        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        .authenticationProvider(authenticationProvider())
-        .authorizeHttpRequests(auth -> auth
-            // Khu vực công khai: Đăng nhập và xem danh sách Tour
-            .requestMatchers("/api/auth/**").permitAll()
-            .requestMatchers("/avatar/**").permitAll()
-            .requestMatchers("/tour/**").permitAll()
-            .requestMatchers("/api/address/**").permitAll()
-            .requestMatchers(HttpMethod.GET, "/api/tour/**", "/api/diem-den/**").permitAll()
-            .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
-            //.requestMatchers("/api/bookings/**").permitAll()
+            .csrf(csrf -> csrf.disable())
+            .cors(cors -> cors.configurationSource(request -> {
+                CorsConfiguration config = new CorsConfiguration();
+                config.setAllowedOrigins(List.of("*"));
+                config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+                config.setAllowedHeaders(List.of("*"));
+                return config;
+            }))
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authenticationProvider(authenticationProvider())
+            .authorizeHttpRequests(auth -> auth
+                
+                // CÔNG KHAI (Ảnh và Tài liệu API)
+                .requestMatchers("/avatar/**", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
+                .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/tour/**", "/api/diem-den/**", "/api/address/**").permitAll()
+                
+                // PHÂN QUYỀN ADMIN
+                .requestMatchers("/api/admin/**").hasRole("Admin") // không dùng hasAuthority("Admin") vì trong model đã thêm ROLE_
+                
+                // TẤT CẢ CÁC API KHÁC BẮT BUỘC ĐĂNG NHẬP
+                .anyRequest().authenticated()
+            );
 
-            // Khu vực phân quyền admin
-            .requestMatchers("/api/admin/**").hasRole("Admin")
-
-            // Các khu vực còn lại yêu cầu phải đăng nhập
-            .anyRequest().authenticated()
-        );
-
-    http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-    return http.build();
+        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        
+        return http.build();
     }
 }
