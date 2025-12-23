@@ -6,6 +6,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -23,6 +24,7 @@ import com.example.travelappapi.model.NguoiDung;
 import java.nio.file.*;
 import java.util.UUID;
 import java.util.Map;
+import java.util.List;
 
 
 @RestController
@@ -77,7 +79,7 @@ public ResponseEntity<?> register(@RequestBody com.example.travelappapi.dto.Regi
 
             // Lấy user đã đăng nhập
             NguoiDung user = (NguoiDung) authentication.getPrincipal();
-
+          
             // Tạo JWT
             String jwt = tokenProvider.generateToken(authentication);
 
@@ -104,19 +106,20 @@ public ResponseEntity<?> register(@RequestBody com.example.travelappapi.dto.Regi
     
     }
 
-    @PutMapping("/user/{id}")
+   @PutMapping("/user/{id}")
     public ResponseEntity<?> updateNguoiDung(@PathVariable Integer id, @RequestBody NguoiDung updateData) {
         return nguoiDungRepository.findById(id).map(user -> {
-
-            user.setHoTen(updateData.getHoTen());
-            user.setSoDienThoai(updateData.getSoDienThoai());
-            user.setNgaySinh(updateData.getNgaySinh());
-            user.setDiaChi(updateData.getDiaChi());
-            user.setGioiTinh(updateData.getGioiTinh());
-            user.setAnhDaiDien(updateData.getAnhDaiDien());
+            if (updateData.getHoTen() != null) user.setHoTen(updateData.getHoTen());
+            if (updateData.getSoDienThoai() != null) user.setSoDienThoai(updateData.getSoDienThoai());
+            if (updateData.getNgaySinh() != null) user.setNgaySinh(updateData.getNgaySinh());
+            if (updateData.getDiaChi() != null) user.setDiaChi(updateData.getDiaChi());
+            if (updateData.getGioiTinh() != null) user.setGioiTinh(updateData.getGioiTinh());
+            if (updateData.getAnhDaiDien() != null) user.setAnhDaiDien(updateData.getAnhDaiDien());
+            
+            // ĐỂ KHÓA TÀI KHOẢN
+            if (updateData.getTrangThai() != null) user.setTrangThai(updateData.getTrangThai());
             
             NguoiDung updatedUser = nguoiDungRepository.save(user);
-            
             return ResponseEntity.ok(updatedUser);
 
         }).orElse(ResponseEntity.notFound().build());
@@ -157,7 +160,11 @@ public ResponseEntity<?> register(@RequestBody com.example.travelappapi.dto.Regi
             nguoiDungRepository.save(user);
 
             return ResponseEntity.ok("Đổi mật khẩu thành công!");
-
-        }) .orElse(ResponseEntity.status(404).body("Không tìm thấy người dùng"));
-    } 
+        }).orElse(ResponseEntity.status(404).body("Không tìm thấy người dùng"));
+    }
+    
+   @GetMapping("/users")
+    public ResponseEntity<List<NguoiDung>> getAllUsers() {
+        return ResponseEntity.ok(nguoiDungRepository.findAll());
+    }
 }
