@@ -11,12 +11,20 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.travelappapi.config.JwtTokenProvider;
 import com.example.travelappapi.dto.LoginRequest;
 import com.example.travelappapi.dto.LoginResponse;
 import com.example.travelappapi.model.NguoiDung;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+import java.nio.file.*;
+import java.util.UUID;
+import java.util.Map;
+
 
 @RestController
 @RequestMapping("/api/auth")
@@ -104,10 +112,31 @@ public ResponseEntity<?> register(@RequestBody com.example.travelappapi.dto.Regi
             user.setNgaySinh(updateData.getNgaySinh());
             user.setDiaChi(updateData.getDiaChi());
             user.setGioiTinh(updateData.getGioiTinh());
+            user.setAnhDaiDien(updateData.getAnhDaiDien());
             
             NguoiDung updatedUser = nguoiDungRepository.save(user);
             
             return ResponseEntity.ok(updatedUser);
         }).orElse(ResponseEntity.notFound().build());
     }
+   @PostMapping("/uploadAnhDaiDien")
+public ResponseEntity<?> uploadAnhDaiDien(@RequestParam("file") MultipartFile file) {
+    try {
+        Path rootPath = Paths.get("uploads/avatar").toAbsolutePath().normalize();
+    
+        if (!Files.exists(rootPath)) {
+            Files.createDirectories(rootPath);
+        }
+
+        String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+        Path filePath = rootPath.resolve(fileName); 
+        
+        Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+        
+        return ResponseEntity.ok(Map.of("fileName", fileName));
+    } catch (Exception e) {
+        e.printStackTrace(); 
+        return ResponseEntity.status(500).body("Lỗi server: " + e.getMessage());
+    }
+} 
 }
