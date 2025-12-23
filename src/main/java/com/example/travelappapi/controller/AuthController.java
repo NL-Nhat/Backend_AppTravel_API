@@ -21,8 +21,6 @@ import com.example.travelappapi.dto.ChangePasswordRequest;
 import com.example.travelappapi.dto.LoginRequest;
 import com.example.travelappapi.dto.LoginResponse;
 import com.example.travelappapi.model.NguoiDung;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.multipart.MultipartFile;
 import java.nio.file.*;
 import java.util.UUID;
 import java.util.Map;
@@ -43,8 +41,12 @@ private org.springframework.security.crypto.password.PasswordEncoder passwordEnc
 
 @PostMapping("/register")
 public ResponseEntity<?> register(@RequestBody com.example.travelappapi.dto.RegisterRequest request) {
+<<<<<<< HEAD
     System.out.println("DEBUG: Vai tro nhan duoc = " + request.getVaiTro());
     System.out.println("DEBUG: Gioi tinh nhan duoc = " + request.getGioiTinh());
+=======
+    
+>>>>>>> af147ae0213ddb7a97c63c0600c3c15b648167cf
     // 1. Kiểm tra trùng tên đăng nhập
     if (nguoiDungRepository.existsByTenDangNhap(request.getTenDangNhap())) {
         return ResponseEntity.status(400).body("Tên đăng nhập đã tồn tại!");
@@ -131,6 +133,7 @@ public ResponseEntity<?> register(@RequestBody com.example.travelappapi.dto.Regi
             
             NguoiDung updatedUser = nguoiDungRepository.save(user);
             return ResponseEntity.ok(updatedUser);
+
         }).orElse(ResponseEntity.notFound().build());
     }
    @PostMapping("/uploadAnhDaiDien")
@@ -154,18 +157,20 @@ public ResponseEntity<?> register(@RequestBody com.example.travelappapi.dto.Regi
         }
     }
     @PutMapping("/user/{id}/doiMatKhau")
-    public ResponseEntity<?> doiMatKhau(
-            @PathVariable Integer id,
-            @RequestBody ChangePasswordRequest request) {
+    public ResponseEntity<?> doiMatKhau(@PathVariable Integer id, @RequestBody ChangePasswordRequest request) {
         return nguoiDungRepository.findById(id).map(user -> {
+
             if (!passwordEncoder.matches(request.getOldPassword(), user.getMatKhau())) {
                 return ResponseEntity.status(400).body("Mật khẩu hiện tại không đúng");
             }
+
             if (request.getOldPassword().equals(request.getNewPassword())) {
                 return ResponseEntity.status(400).body("Mật khẩu mới không được trùng mật khẩu cũ");
             }
+
             user.setMatKhau(passwordEncoder.encode(request.getNewPassword()));
             nguoiDungRepository.save(user);
+
             return ResponseEntity.ok("Đổi mật khẩu thành công!");
         }).orElse(ResponseEntity.status(404).body("Không tìm thấy người dùng"));
     }
