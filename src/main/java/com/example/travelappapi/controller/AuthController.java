@@ -43,6 +43,8 @@ private org.springframework.security.crypto.password.PasswordEncoder passwordEnc
 
 @PostMapping("/register")
 public ResponseEntity<?> register(@RequestBody com.example.travelappapi.dto.RegisterRequest request) {
+    System.out.println("DEBUG: Vai tro nhan duoc = " + request.getVaiTro());
+    System.out.println("DEBUG: Gioi tinh nhan duoc = " + request.getGioiTinh());
     // 1. Kiểm tra trùng tên đăng nhập
     if (nguoiDungRepository.existsByTenDangNhap(request.getTenDangNhap())) {
         return ResponseEntity.status(400).body("Tên đăng nhập đã tồn tại!");
@@ -55,7 +57,14 @@ public ResponseEntity<?> register(@RequestBody com.example.travelappapi.dto.Regi
     user.setHoTen(request.getHoTen());
     user.setEmail(request.getEmail());
     user.setSoDienThoai(request.getSoDienThoai());
-    user.setVaiTro("KhachHang"); // Mặc định tài khoản mới là người dùng
+    user.setDiaChi(request.getDiaChi()); 
+    user.setNgaySinh(request.getNgaySinh());
+    user.setGioiTinh(request.getGioiTinh()); 
+    if (request.getVaiTro() != null && !request.getVaiTro().trim().isEmpty()) {
+        user.setVaiTro(request.getVaiTro());
+    } else {
+        user.setVaiTro("KhachHang");
+    }
     user.setTrangThai("HoatDong"); // Mặc định tài khoản mới là hoạt động
 
     // 3. Lưu vào DB

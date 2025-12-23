@@ -67,6 +67,7 @@ public class SecurityConfig {
             .requestMatchers("/tour/**").permitAll()
             .requestMatchers("/api/auth/uploadAnhDaiDien").permitAll()
             .requestMatchers(HttpMethod.PUT, "/api/auth/user/**").permitAll()
+            .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
             .requestMatchers("/api/auth/**").permitAll()
             .requestMatchers("/api/address/**").permitAll()
             .requestMatchers(HttpMethod.GET, "/api/tour/**", "/api/diem-den/**").permitAll()
