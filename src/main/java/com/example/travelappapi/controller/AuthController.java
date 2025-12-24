@@ -3,6 +3,9 @@ package com.example.travelappapi.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -113,9 +116,11 @@ public ResponseEntity<?> register(@RequestBody com.example.travelappapi.dto.Regi
                 )
             );
 
-        } catch (Exception e) {
-            return ResponseEntity.status(401)
-                    .body("Tên đăng nhập hoặc mật khẩu không đúng");
+        } catch (LockedException e) {
+            return ResponseEntity.status(423).body("Tài khoản đã bị khóa");
+        }
+        catch (BadCredentialsException e) {
+            return ResponseEntity.status(401).body("Sai tên đăng nhập hoặc mật khẩu");
         }
     }
 

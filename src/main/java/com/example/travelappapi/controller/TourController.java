@@ -26,11 +26,11 @@ public class TourController {
         this.tourService = tourService;
     }
 
-    @GetMapping("/all")
+    @GetMapping("/all-tour-by-trangthai")
     // Kiểu trả về ResponseEntity<?> trả về được cả List hoặc Lỗi
-    public ResponseEntity<?> getAllTours() {
+    public ResponseEntity<?> getAllTourByTrangThai() {
         try {
-            List<Tour> tours = tourService.getAllTours();
+            List<Tour> tours = tourService.getAllTourByTrangThai("DangMo");
             //Trả về HTTP 200 (OK) kèm dữ liệu
             return ResponseEntity.ok(tours); 
         } catch (Exception e) {
