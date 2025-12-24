@@ -41,10 +41,13 @@ public class AuthController {
 @Autowired
 private AuthenticationManager authenticationManager;
 @Autowired
-private com.example.travelappapi.repository.NguoiDungRepository nguoiDungRepository;
-
+private NguoiDungRepository nguoiDungRepository;
 @Autowired
-private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
+private PasswordEncoder passwordEncoder;
+@Autowired
+private JwtTokenProvider tokenProvider;
+@Autowired
+private CloudinaryService cloudinaryService;
 
 @PostMapping("/register")
 public ResponseEntity<?> register(@RequestBody com.example.travelappapi.dto.RegisterRequest request) {
