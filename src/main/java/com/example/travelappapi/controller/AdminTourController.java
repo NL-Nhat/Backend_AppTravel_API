@@ -3,10 +3,14 @@ package com.example.travelappapi.controller;
 import com.example.travelappapi.dto.TourRequest;
 import com.example.travelappapi.model.*;
 import com.example.travelappapi.repository.*;
+import com.example.travelappapi.service.CloudinaryService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -22,9 +26,10 @@ public class AdminTourController {
     @Autowired private DiemDenRepository diemDenRepository;
     @Autowired private LichKhoiHanhRepository lichKhoiHanhRepository;
     @Autowired private NguoiDungRepository nguoiDungRepository;
+    @Autowired private CloudinaryService cloudinaryService;
 
     // 1. Lấy danh sách tất cả Tour
-    @GetMapping("")
+    @GetMapping("all")
     public ResponseEntity<List<Tour>> getAllTours() {
         return ResponseEntity.ok(tourRepository.findAll());
     }
@@ -37,53 +42,44 @@ public class AdminTourController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // 3. API Lấy danh sách Hướng dẫn viên
-    @GetMapping("/huong-dan-vien")
-    public ResponseEntity<List<NguoiDung>> getHuongDanViens() {
-        List<NguoiDung> tatCa = nguoiDungRepository.findAll();
-        List<NguoiDung> danhSachHDV = new ArrayList<>();
-        for (NguoiDung nd : tatCa) {
-            if ("HuongDanVien".equalsIgnoreCase(nd.getVaiTro())) {
-                danhSachHDV.add(nd);
-            }
-        }
-        return ResponseEntity.ok(danhSachHDV);
-    }
 
-    // 4. Lưu Tour và Lịch trình cùng lúc
-    @PostMapping("/add-full")
+    // Lưu Tour và Lịch trình cùng lúc
+    @PostMapping(value = "/add-full", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Transactional
-    public ResponseEntity<?> addFullTour(@RequestBody TourRequest request) {
+    public ResponseEntity<?> addFullTour(@RequestPart("tour") TourRequest request, @RequestParam("file") MultipartFile file) {
         try {
             Tour tour = new Tour();
             tour.setTenTour(request.getTenTour());
             tour.setMoTa(request.getMoTa());
             tour.setGiaNguoiLon(request.getGiaNguoiLon());
             tour.setGiaTreEm(request.getGiaTreEm());
-            tour.setUrlHinhAnhChinh(request.getUrlHinhAnhChinh());
             tour.setTrangThai(request.getTrangThai());
-            
-            DiemDen dd = diemDenRepository.findById(request.getMaDiemDen()).orElse(null);
+
+            String fixedFileName = "tour_" + System.currentTimeMillis() + ".jpg";
+            String secureUrl = cloudinaryService.uploadImage(file, fixedFileName);
+
+            tour.setUrlHinhAnhChinh(fixedFileName);
+
+            DiemDen dd = diemDenRepository.findById(request.getMaDiemDen()).orElseThrow(() -> new RuntimeException("Không tìm thấy điểm đến"));
             tour.setDiemDen(dd);
             
             Tour savedTour = tourRepository.save(tour);
 
             if (request.getLichKhoiHanhs() != null) {
                 for (TourRequest.LichKhoiHanhDTO dto : request.getLichKhoiHanhs()) {
+
                     LichKhoiHanh lkh = new LichKhoiHanh();
-                    try {
-                        lkh.setNgayKhoiHanh(LocalDateTime.parse(dto.getNgayKhoiHanh()));
-                        lkh.setNgayKetThuc(LocalDateTime.parse(dto.getNgayKetThuc()));
-                    } catch (Exception e) {
-                        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-                        lkh.setNgayKhoiHanh(LocalDateTime.parse(dto.getNgayKhoiHanh(), fmt));
-                        lkh.setNgayKetThuc(LocalDateTime.parse(dto.getNgayKetThuc(), fmt));
-                    }
+                    DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+                    lkh.setNgayKhoiHanh(LocalDateTime.parse(dto.getNgayKhoiHanh(), fmt));
+                    lkh.setNgayKetThuc(LocalDateTime.parse(dto.getNgayKetThuc(), fmt));
                     lkh.setSoLuongKhachToiDa(dto.getSoLuongKhachToiDa());
                     lkh.setTour(savedTour);
+
                     if (dto.getMaHDV() != null) {
                         nguoiDungRepository.findById(dto.getMaHDV()).ifPresent(lkh::setHuongDanVien);
                     }
+                    
                     lichKhoiHanhRepository.save(lkh);
                 }
             }
@@ -93,26 +89,38 @@ public class AdminTourController {
         }
     }
 
-    // 5. Cập nhật Tour (SỬA ĐỂ CẬP NHẬT CẢ HDV TRONG LỊCH TRÌNH)
-    @PutMapping("/{id}")
+    // Cập nhật Tour (SỬA ĐỂ CẬP NHẬT CẢ HDV TRONG LỊCH TRÌNH)
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Transactional
-    public ResponseEntity<?> updateTour(@PathVariable Integer id, @RequestBody TourRequest request) {
+    public ResponseEntity<?> updateTour(@PathVariable Integer id, 
+                                        @RequestPart("tour") TourRequest request, 
+                                        @RequestPart(value = "file", required = false) MultipartFile file) {
         try {
             Tour tour = tourRepository.findById(id)
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy Tour"));
 
+            if (file != null && !file.isEmpty()) {
+            // Xóa ảnh cũ trên Cloudinary
+            cloudinaryService.deleteImage(tour.getUrlHinhAnhChinh());
+
+            //Upload ảnh mới với tên mới (để tránh cache trình duyệt)
+            String newFileName = "tour_" + System.currentTimeMillis() + ".jpg";
+            cloudinaryService.uploadImage(file, newFileName);
+
+            //Cập nhật tên file mới vào DB
+            tour.setUrlHinhAnhChinh(newFileName);
+        }
             // Cập nhật thông tin Tour
             tour.setTenTour(request.getTenTour());
             tour.setMoTa(request.getMoTa());
             tour.setGiaNguoiLon(request.getGiaNguoiLon());
             tour.setGiaTreEm(request.getGiaTreEm());
             tour.setTrangThai(request.getTrangThai());
-            tour.setUrlHinhAnhChinh(request.getUrlHinhAnhChinh());
 
             DiemDen dd = diemDenRepository.findById(request.getMaDiemDen()).orElse(null);
             tour.setDiemDen(dd);
 
-            // Logic cập nhật Hướng dẫn viên cho các lịch trình hiện có
+            //cập nhật Hướng dẫn viên cho các lịch trình hiện có
             if (request.getLichKhoiHanhs() != null && !request.getLichKhoiHanhs().isEmpty()) {
                 List<LichKhoiHanh> currentSchedules = tour.getLichKhoiHanhs();
                 

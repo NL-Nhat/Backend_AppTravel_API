@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/admin/diem-den")
+@RequestMapping("/api/diem-den")
 public class DiemDenController {
 
     @Autowired
@@ -18,7 +18,6 @@ public class DiemDenController {
 
     @GetMapping
     public List<DiemDen> getAllDiemDen() {
-        // Lấy dữ liệu từ Repository và trả về danh sách JSON
         return diemDenRepository.findAll();
     }
 }
