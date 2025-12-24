@@ -43,8 +43,7 @@ public class BookingController {
                     .body(new BookingResponseDTO(maDatTour, "Đặt tour thành công"));
                     
         } catch (RuntimeException e) {
-            // Bắt các lỗi nghiệp vụ (ví dụ: hết chỗ, sai ID người dùng...) 
-            // Trả về mã 400 Bad Request để Android biết lỗi gì mà hiện Toast
+            
             return ResponseEntity.badRequest()
                     .body(new BookingResponseDTO(0, e.getMessage()));
                     

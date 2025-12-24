@@ -41,4 +41,8 @@ public class TourService {
         return danhGiaRepository.findByTour_MaTourOrderByThoiGianTaoDesc(tourId);
     }
 
+    public List<Tour> getAllTourByTrangThai(String trangThai) {
+        return tourRepository.findByTrangThai(trangThai);
+    }
+
 }

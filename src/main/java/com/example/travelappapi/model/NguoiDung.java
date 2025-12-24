@@ -93,7 +93,7 @@ public class NguoiDung implements UserDetails{
 
     @Override
     public boolean isAccountNonLocked() {
-        return true; // Tài khoản không bị khóa
+        return trangThai != null && trangThai.equalsIgnoreCase("HoatDong");
     }
 
     @Override
@@ -103,9 +103,8 @@ public class NguoiDung implements UserDetails{
 
     @Override
     public boolean isEnabled() {
-        return trangThai != null && trangThai.trim().equalsIgnoreCase("HoatDong");
+        return true;
     }
-
 
     @Override
     public Collection <? extends GrantedAuthority> getAuthorities() {
