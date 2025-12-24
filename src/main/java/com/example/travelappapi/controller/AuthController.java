@@ -31,6 +31,7 @@ import java.util.UUID;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.List;
 
 
 @RestController
@@ -85,7 +86,7 @@ public class AuthController {
 
             // Lấy user đã đăng nhập
             NguoiDung user = (NguoiDung) authentication.getPrincipal();
-
+          
             // Tạo JWT
             String jwt = tokenProvider.generateToken(authentication);
 
@@ -118,19 +119,20 @@ public class AuthController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PutMapping("/user/{id}")
+   @PutMapping("/user/{id}")
     public ResponseEntity<?> updateNguoiDung(@PathVariable Integer id, @RequestBody NguoiDung updateData) {
         return nguoiDungRepository.findById(id).map(user -> {
-
-            user.setHoTen(updateData.getHoTen());
-            user.setSoDienThoai(updateData.getSoDienThoai());
-            user.setNgaySinh(updateData.getNgaySinh());
-            user.setDiaChi(updateData.getDiaChi());
-            user.setGioiTinh(updateData.getGioiTinh());
-            user.setAnhDaiDien(updateData.getAnhDaiDien());
+            if (updateData.getHoTen() != null) user.setHoTen(updateData.getHoTen());
+            if (updateData.getSoDienThoai() != null) user.setSoDienThoai(updateData.getSoDienThoai());
+            if (updateData.getNgaySinh() != null) user.setNgaySinh(updateData.getNgaySinh());
+            if (updateData.getDiaChi() != null) user.setDiaChi(updateData.getDiaChi());
+            if (updateData.getGioiTinh() != null) user.setGioiTinh(updateData.getGioiTinh());
+            if (updateData.getAnhDaiDien() != null) user.setAnhDaiDien(updateData.getAnhDaiDien());
+            
+            // ĐỂ KHÓA TÀI KHOẢN
+            if (updateData.getTrangThai() != null) user.setTrangThai(updateData.getTrangThai());
             
             NguoiDung updatedUser = nguoiDungRepository.save(user);
-            
             return ResponseEntity.ok(updatedUser);
 
         }).orElse(ResponseEntity.notFound().build());
@@ -178,7 +180,11 @@ public class AuthController {
             nguoiDungRepository.save(user);
 
             return ResponseEntity.ok("Đổi mật khẩu thành công!");
-
-        }) .orElse(ResponseEntity.status(404).body("Không tìm thấy người dùng"));
-    } 
+        }).orElse(ResponseEntity.status(404).body("Không tìm thấy người dùng"));
+    }
+    
+   @GetMapping("/users")
+    public ResponseEntity<List<NguoiDung>> getAllUsers() {
+        return ResponseEntity.ok(nguoiDungRepository.findAll());
+    }
 }
