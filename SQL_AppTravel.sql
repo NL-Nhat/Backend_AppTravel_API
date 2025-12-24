@@ -28,7 +28,7 @@ CREATE TABLE NguoiDung (
     email NVARCHAR(100) NOT NULL UNIQUE,
     matKhau VARCHAR(255) NOT NULL,
     hoTen NVARCHAR(100) NOT NULL,
-    soDienThoai NVARCHAR(15) unique,
+    soDienThoai NVARCHAR(15),
     diaChi NVARCHAR(255),
     ngaySinh DATE,
     gioiTinh NVARCHAR(10) CHECK (gioiTinh IN ('Nam', 'Nu')),
@@ -68,7 +68,7 @@ CREATE TABLE LichKhoiHanh (
     ngayKetThuc DATETIME NOT NULL,
     huongDanVien INT, --ID
     soLuongKhachToiDa INT NOT NULL CHECK (soLuongKhachToiDa > 0),
-    soLuongKhachDaDat INT DEFAULT 0 CHECK (soLuongKhachDaDat >= 0)
+    soLuongKhachDaDat INT not null DEFAULT 0 CHECK (soLuongKhachDaDat >= 0)
     
     CONSTRAINT FK_LichKhoiHanh_Tour FOREIGN KEY (maTour) REFERENCES Tour(maTour),
     CONSTRAINT FK_LichKhoiHanh_HDV FOREIGN KEY (huongDanVien) REFERENCES NguoiDung(maNguoiDung),

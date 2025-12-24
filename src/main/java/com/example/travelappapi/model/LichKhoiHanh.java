@@ -2,6 +2,9 @@ package com.example.travelappapi.model;
 
 import java.time.LocalDateTime;
 import java.util.List;
+
+import org.hibernate.annotations.DynamicInsert;
+
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -10,6 +13,7 @@ import lombok.*;
 @Entity
 @Data
 @NoArgsConstructor
+@DynamicInsert
 @AllArgsConstructor
 @Table(name = "LichKhoiHanh")
 public class LichKhoiHanh {

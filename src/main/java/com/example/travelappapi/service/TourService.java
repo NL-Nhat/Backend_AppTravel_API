@@ -1,9 +1,7 @@
 package com.example.travelappapi.service;
 
 import java.util.List;
-
 import org.springframework.stereotype.Service;
-
 import com.example.travelappapi.model.DanhGia;
 import com.example.travelappapi.model.LichKhoiHanh;
 import com.example.travelappapi.model.Tour;
@@ -18,9 +16,7 @@ public class TourService {
     private final LichKhoiHanhRepository lichKhoiHanhRepository;
     private final DanhGiaRepository danhGiaRepository;
 
-    public TourService(TourRepository tourRepository, 
-                       LichKhoiHanhRepository lichKhoiHanhRepository,
-                       DanhGiaRepository danhGiaRepository) {
+    public TourService(TourRepository tourRepository, LichKhoiHanhRepository lichKhoiHanhRepository, DanhGiaRepository danhGiaRepository) {
         this.tourRepository = tourRepository;
         this.lichKhoiHanhRepository = lichKhoiHanhRepository;
         this.danhGiaRepository = danhGiaRepository;

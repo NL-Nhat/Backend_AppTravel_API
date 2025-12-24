@@ -65,7 +65,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 
                 // CÔNG KHAI (Ảnh và Tài liệu API)
-                .requestMatchers("/avatar/**", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
+                .requestMatchers("/avatar/**", "/tour/**", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                 .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/tour/**", "/api/diem-den/**", "/api/address/**").permitAll()
                 .requestMatchers("/api/auth/uploadAnhDaiDien").permitAll()
