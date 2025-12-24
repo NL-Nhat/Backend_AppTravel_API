@@ -68,6 +68,9 @@ public class SecurityConfig {
                 .requestMatchers("/avatar/**", "/tour/**", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                 .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/tour/**", "/api/diem-den/**", "/api/address/**").permitAll()
+                .requestMatchers("/api/auth/uploadAnhDaiDien").permitAll()
+                .requestMatchers(HttpMethod.PUT, "/api/auth/user/**").permitAll()
+                .requestMatchers("/api/auth/**").permitAll()
                 
                 // PHÂN QUYỀN ADMIN
                 .requestMatchers("/api/admin/**").hasRole("Admin") // không dùng hasAuthority("Admin") vì trong model đã thêm ROLE_
