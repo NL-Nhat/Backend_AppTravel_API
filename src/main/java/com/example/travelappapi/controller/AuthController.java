@@ -31,8 +31,8 @@ import java.util.List;
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
+@Autowired
+private AuthenticationManager authenticationManager;
 @Autowired
 private com.example.travelappapi.repository.NguoiDungRepository nguoiDungRepository;
 
@@ -41,12 +41,6 @@ private org.springframework.security.crypto.password.PasswordEncoder passwordEnc
 
 @PostMapping("/register")
 public ResponseEntity<?> register(@RequestBody com.example.travelappapi.dto.RegisterRequest request) {
-<<<<<<< HEAD
-    System.out.println("DEBUG: Vai tro nhan duoc = " + request.getVaiTro());
-    System.out.println("DEBUG: Gioi tinh nhan duoc = " + request.getGioiTinh());
-=======
-    
->>>>>>> af147ae0213ddb7a97c63c0600c3c15b648167cf
     // 1. Kiểm tra trùng tên đăng nhập
     if (nguoiDungRepository.existsByTenDangNhap(request.getTenDangNhap())) {
         return ResponseEntity.status(400).body("Tên đăng nhập đã tồn tại!");
