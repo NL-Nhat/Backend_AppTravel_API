@@ -6,6 +6,8 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -19,10 +21,16 @@ import com.example.travelappapi.config.JwtTokenProvider;
 import com.example.travelappapi.dto.ChangePasswordRequest;
 import com.example.travelappapi.dto.LoginRequest;
 import com.example.travelappapi.dto.LoginResponse;
+import com.example.travelappapi.dto.RegisterRequest;
 import com.example.travelappapi.model.NguoiDung;
+import com.example.travelappapi.repository.NguoiDungRepository;
+import com.example.travelappapi.service.CloudinaryService;
+
 import java.nio.file.*;
 import java.util.UUID;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 
 @RestController
@@ -31,36 +39,37 @@ public class AuthController {
 
     @Autowired
     private AuthenticationManager authenticationManager;
-@Autowired
-private com.example.travelappapi.repository.NguoiDungRepository nguoiDungRepository;
-
-@Autowired
-private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
-
-@PostMapping("/register")
-public ResponseEntity<?> register(@RequestBody com.example.travelappapi.dto.RegisterRequest request) {
-    
-    // 1. Kiểm tra trùng tên đăng nhập
-    if (nguoiDungRepository.existsByTenDangNhap(request.getTenDangNhap())) {
-        return ResponseEntity.status(400).body("Tên đăng nhập đã tồn tại!");
-    }
-
-    // 2. Tạo đối tượng người dùng mới
-    NguoiDung user = new NguoiDung();
-    user.setTenDangNhap(request.getTenDangNhap());
-    user.setMatKhau(passwordEncoder.encode(request.getMatKhau())); // Mã hóa mật khẩu bảo mật
-    user.setHoTen(request.getHoTen());
-    user.setEmail(request.getEmail());
-    user.setVaiTro("KhachHang"); // Mặc định tài khoản mới là người dùng
-    user.setTrangThai("HoatDong"); // Mặc định tài khoản mới là hoạt động
-
-    // 3. Lưu vào DB
-    nguoiDungRepository.save(user);
-
-    return ResponseEntity.ok("Đăng ký thành công!");
-}
+    @Autowired
+    private NguoiDungRepository nguoiDungRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
     @Autowired
     private JwtTokenProvider tokenProvider;
+    @Autowired
+    private CloudinaryService cloudinaryService;
+
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
+    
+        // 1. Kiểm tra trùng tên đăng nhập
+        if (nguoiDungRepository.existsByTenDangNhap(request.getTenDangNhap())) {
+            return ResponseEntity.status(400).body("Tên đăng nhập đã tồn tại!");
+        }
+
+        // 2. Tạo đối tượng người dùng mới
+        NguoiDung user = new NguoiDung();
+        user.setTenDangNhap(request.getTenDangNhap());
+        user.setMatKhau(passwordEncoder.encode(request.getMatKhau())); // Mã hóa mật khẩu bảo mật
+        user.setHoTen(request.getHoTen());
+        user.setEmail(request.getEmail());
+        user.setVaiTro("KhachHang"); // Mặc định tài khoản mới là người dùng
+        user.setTrangThai("HoatDong"); // Mặc định tài khoản mới là hoạt động
+
+        // 3. Lưu vào DB
+        nguoiDungRepository.save(user);
+
+        return ResponseEntity.ok("Đăng ký thành công!");
+    }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
@@ -100,7 +109,13 @@ public ResponseEntity<?> register(@RequestBody com.example.travelappapi.dto.Regi
             return ResponseEntity.status(401)
                     .body("Tên đăng nhập hoặc mật khẩu không đúng");
         }
-    
+    }
+
+    @GetMapping("/user/{id}")
+    public ResponseEntity<?> getNguoiDung(@PathVariable Integer id) {
+        return nguoiDungRepository.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @PutMapping("/user/{id}")
@@ -120,26 +135,33 @@ public ResponseEntity<?> register(@RequestBody com.example.travelappapi.dto.Regi
 
         }).orElse(ResponseEntity.notFound().build());
     }
-   @PostMapping("/uploadAnhDaiDien")
-    public ResponseEntity<?> uploadAnhDaiDien(@RequestParam("file") MultipartFile file) {
-        try {
-            Path rootPath = Paths.get("uploads/avatar").toAbsolutePath().normalize();
-        
-            if (!Files.exists(rootPath)) {
-                Files.createDirectories(rootPath);
-            }
 
-            String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
-            Path filePath = rootPath.resolve(fileName); 
+   @PostMapping("/uploadAnhDaiDien")
+    public ResponseEntity<?> uploadAvatar(@RequestParam("file") MultipartFile file, @RequestParam("userId") int userId) {
+        try {
+            // Đặt tên file
+            String fileName = "avatar_" + userId; // đặt tên theo ID để tránh trùng
             
-            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+            // Upload lên Cloudinary
+            String url = cloudinaryService.uploadImage(file, fileName);
             
-            return ResponseEntity.ok(Map.of("fileName", fileName));
+            // Cập nhật Database
+            NguoiDung user = nguoiDungRepository.findById(userId)
+                                                .orElseThrow(() -> new RuntimeException("Không tìm thấy user"));
+            user.setAnhDaiDien(fileName + ".jpg"); // Lưu tên vào SQL
+            nguoiDungRepository.save(user);
+
+            Map<String, String> response = new HashMap<>();
+            response.put("fileName", fileName);
+            response.put("url", url);
+
+            return ResponseEntity.ok(response);
+            
         } catch (Exception e) {
-            e.printStackTrace(); 
-            return ResponseEntity.status(500).body("Lỗi server: " + e.getMessage());
+            return ResponseEntity.status(500).body("Lỗi upload");
         }
     }
+
     @PutMapping("/user/{id}/doiMatKhau")
     public ResponseEntity<?> doiMatKhau(@PathVariable Integer id, @RequestBody ChangePasswordRequest request) {
         return nguoiDungRepository.findById(id).map(user -> {

@@ -68,7 +68,7 @@ CREATE TABLE LichKhoiHanh (
     ngayKetThuc DATETIME NOT NULL,
     huongDanVien INT, --ID
     soLuongKhachToiDa INT NOT NULL CHECK (soLuongKhachToiDa > 0),
-    soLuongKhachDaDat INT DEFAULT 0 CHECK (soLuongKhachDaDat >= 0)
+    soLuongKhachDaDat INT not null DEFAULT 0 CHECK (soLuongKhachDaDat >= 0)
     
     CONSTRAINT FK_LichKhoiHanh_Tour FOREIGN KEY (maTour) REFERENCES Tour(maTour),
     CONSTRAINT FK_LichKhoiHanh_HDV FOREIGN KEY (huongDanVien) REFERENCES NguoiDung(maNguoiDung),
