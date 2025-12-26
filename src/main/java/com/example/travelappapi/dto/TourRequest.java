@@ -17,6 +17,7 @@ public class TourRequest {
 
     @Data
     public static class LichKhoiHanhDTO {
+        private Integer maLich; 
         private String ngayKhoiHanh; 
         private String ngayKetThuc;
         private Integer soLuongKhachToiDa;

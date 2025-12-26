@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -24,16 +23,11 @@ import com.example.travelappapi.config.JwtTokenProvider;
 import com.example.travelappapi.dto.ChangePasswordRequest;
 import com.example.travelappapi.dto.LoginRequest;
 import com.example.travelappapi.dto.LoginResponse;
-import com.example.travelappapi.dto.RegisterRequest;
 import com.example.travelappapi.model.NguoiDung;
 import com.example.travelappapi.repository.NguoiDungRepository;
 import com.example.travelappapi.service.CloudinaryService;
-
-import java.nio.file.*;
-import java.util.UUID;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.List;
 
 
@@ -140,6 +134,7 @@ public ResponseEntity<?> register(@RequestBody com.example.travelappapi.dto.Regi
             if (updateData.getDiaChi() != null) user.setDiaChi(updateData.getDiaChi());
             if (updateData.getGioiTinh() != null) user.setGioiTinh(updateData.getGioiTinh());
             if (updateData.getAnhDaiDien() != null) user.setAnhDaiDien(updateData.getAnhDaiDien());
+            if(updateData.getEmail() != null) user.setEmail(updateData.getEmail());
             
             // ĐỂ KHÓA TÀI KHOẢN
             if (updateData.getTrangThai() != null) user.setTrangThai(updateData.getTrangThai());
@@ -153,16 +148,17 @@ public ResponseEntity<?> register(@RequestBody com.example.travelappapi.dto.Regi
    @PostMapping("/uploadAnhDaiDien")
     public ResponseEntity<?> uploadAvatar(@RequestParam("file") MultipartFile file, @RequestParam("userId") int userId) {
         try {
-            // Đặt tên file
-            String fileName = "avatar_" + userId; // đặt tên theo ID để tránh trùng
-            
-            // Upload lên Cloudinary
-            String url = cloudinaryService.uploadImage(file, fileName);
-            
-            // Cập nhật Database
             NguoiDung user = nguoiDungRepository.findById(userId)
                                                 .orElseThrow(() -> new RuntimeException("Không tìm thấy user"));
-            user.setAnhDaiDien(fileName + ".jpg"); // Lưu tên vào SQL
+
+            cloudinaryService.deleteImage(user.getAnhDaiDien());
+
+            String fileName = "avatar_" + System.currentTimeMillis() + ".jpg";
+
+            // Upload lên Cloudinary
+            String url = cloudinaryService.uploadImage(file, fileName);
+
+            user.setAnhDaiDien(fileName);
             nguoiDungRepository.save(user);
 
             Map<String, String> response = new HashMap<>();
@@ -199,4 +195,11 @@ public ResponseEntity<?> register(@RequestBody com.example.travelappapi.dto.Regi
     public ResponseEntity<List<NguoiDung>> getAllUsers() {
         return ResponseEntity.ok(nguoiDungRepository.findAll());
     }
+
+    @GetMapping("/count-user")
+    public long conutUser() {
+        Long soUser = nguoiDungRepository.count();
+        return soUser;
+    }
+    
 }

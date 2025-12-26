@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,18 +14,27 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.travelappapi.model.Tour;
+import com.example.travelappapi.repository.TourRepository;
 import com.example.travelappapi.service.TourService;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 
 @RestController
 @RequestMapping("api/tour")
 public class TourController {
 
-    private final TourService tourService;
+    @Autowired
+    private TourService tourService;
+    @Autowired
+    private TourRepository tourRepository;
 
-    public TourController(TourService tourService) {
-        this.tourService = tourService;
+    @GetMapping("/count-tour")
+    public long countTour() {
+        long soTour = tourRepository.count();
+        return soTour;
     }
+    
 
     @GetMapping("/all-tour-by-trangthai")
     // Kiểu trả về ResponseEntity<?> trả về được cả List hoặc Lỗi

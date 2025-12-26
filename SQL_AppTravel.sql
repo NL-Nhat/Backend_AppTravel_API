@@ -258,7 +258,9 @@ INSERT INTO NguoiDung (tenDangNhap, email, matKhau, hoTen, soDienThoai, diaChi, 
 (N'admin2', N'admin@travel.com', N'$2a$10$8.UnVuG9HHgffUDAlk8qfOuVGkqRzgVymGe07xd00DMxs.TVuHOn2', N'Quản Trị Viên', N'0901234567', N'Hà Nội', '1985-05-10', N'Nam', N'admin.jpg', N'Admin', N'HoatDong', GETDATE()),
 (N'hdv_tuan', N'tuanhdv@travel.com', N'$2a$10$8.UnVuG9HHgffUDAlk8qfOuVGkqRzgVymGe07xd00DMxs.TVuHOn2', N'Trần Anh Tuấn', N'0907654321', N'Đà Nẵng', '1992-08-20', N'Nam', N'hdv_tuan.jpg', N'HuongDanVien', N'HoatDong', GETDATE()),
 (N'nhat', N'nhat@gmail.com', N'$2a$10$X7kmatqMdm9KT..Jgk9OCO/4LirhL5Zul/lsMuI7gMlkIn0MVYK/.', N'Nguyễn Long Nhật', N'0988123456', N'Quảng Trị', '1999-01-01', N'Nam', N'luffy.jpg', N'KhachHang', N'HoatDong', GETDATE()),
-(N'kh_an', N'annguyen@gmail.com', N'$2a$10$8.UnVuG9HHgffUDAlk8qfOuVGkqRzgVymGe07xd00DMxs.TVuHOn2', N'Nguyễn Thúy An', N'0911223344', N'HCM', '2000-02-15', N'Nu', N'an_avatar.jpg', N'KhachHang', N'HoatDong', GETDATE());
+(N'kh_an', N'annguyen@gmail.com', N'$2a$10$8.UnVuG9HHgffUDAlk8qfOuVGkqRzgVymGe07xd00DMxs.TVuHOn2', N'Nguyễn Thúy An', N'0911223344', N'Đà Nẵng', '2000-02-15', N'Nu', N'an_avatar.jpg', N'KhachHang', N'HoatDong', GETDATE()),
+(N'hdv_nam', N'namnguyen@gmail.com', N'$2a$10$8.UnVuG9HHgffUDAlk8qfOuVGkqRzgVymGe07xd00DMxs.TVuHOn2', N'Nguyễn Văn Nam', N'0911384734', N'Đà Nẵng', '2000-02-15', N'Nam', N'an_avatar.jpg', N'HuongDanVien', N'HoatDong', GETDATE()),
+(N'hdv_an', N'anguyen@gmail.com', N'$2a$10$8.UnVuG9HHgffUDAlk8qfOuVGkqRzgVymGe07xd00DMxs.TVuHOn2', N'Nguyễn Thị Thúy', N'0911247564', N'Đà Nẵng', '2000-02-15', N'Nu', N'an_avatar.jpg', N'HuongDanVien', N'HoatDong', GETDATE())
 GO
 
 -- BẢNG 2: DIEMDEN (20 Địa điểm)
@@ -364,7 +366,7 @@ GO
 -- BẢNG 6: DATTOUR (20 Bookings)
 -- Chú ý: Trigger sẽ tự update số lượng khách vào bảng LichKhoiHanh
 INSERT INTO DatTour (maNguoiDung, maLichKhoiHanh, soNguoiLon, soTreEm, tongTien, trangThaiDatTour, trangThaiThanhToan, ngayDat, ngayHuy, lyDoHuy) VALUES
-(3, 1, 2, 0, 2500000, N'DaXacNhan', N'DaThanhToan', '2025-12-01', NULL, NULL),
+(3, 2, 2, 0, 2500000, N'DaXacNhan', N'DaThanhToan', '2025-12-01', NULL, NULL),
 (3, 3, 1, 1, 1200000, N'ChoXacNhan', N'ChuaThanhToan', '2025-12-02', NULL, NULL),
 (3, 5, 2, 0, 7000000, N'DaXacNhan', N'DaThanhToan', '2025-12-03', NULL, NULL),
 (3, 6, 2, 1, 12000000, N'DaHuy', N'ChuaThanhToan', '2025-12-04', '2025-12-05', N'Bận đột xuất'),
@@ -373,17 +375,11 @@ INSERT INTO DatTour (maNguoiDung, maLichKhoiHanh, soNguoiLon, soTreEm, tongTien,
 (3, 10, 2, 0, 1600000, N'DaXacNhan', N'DaThanhToan', '2025-12-07', NULL, NULL),
 (3, 11, 2, 0, 3000000, N'DaXacNhan', N'DaThanhToan', '2025-12-08', NULL, NULL),
 (3, 12, 1, 0, 1200000, N'ChoXacNhan', N'DaThanhToan', '2025-12-09', NULL, NULL),
-(3, 13, 2, 0, 5000000, N'DaHuy', N'DaThanhToan', '2025-12-10', '2025-12-11', N'Nhầm ngày'),
-(3, 14, 2, 0, 3200000, N'DaXacNhan', N'ChuaThanhToan', '2025-12-11', NULL, NULL),
+(3, 13, 2, 0, 5000000, N'DaHuy', N'ChuaThanhToan', '2025-12-10', '2025-12-11', N'Nhầm ngày'),
+(3, 14, 2, 0, 3200000, N'DaHuy', N'ChuaThanhToan', '2025-12-11', NULL, NULL),
 (3, 15, 2, 0, 9600000, N'ChoXacNhan', N'ChuaThanhToan', '2025-12-12', NULL, NULL),
 (3, 16, 4, 0, 2400000, N'DaXacNhan', N'DaThanhToan', '2025-12-13', NULL, NULL),
-(3, 17, 2, 1, 7700000, N'DaXacNhan', N'DaThanhToan', '2025-12-14', NULL, NULL),
-(3, 18, 2, 0, 1000000, N'ChoXacNhan', N'ChuaThanhToan', '2025-12-15', NULL, NULL),
-(3, 19, 2, 0, 1500000, N'DaXacNhan', N'DaThanhToan', '2025-12-16', NULL, NULL),
-(3, 20, 2, 0, 1800000, N'DaXacNhan', N'DaThanhToan', '2025-12-17', NULL, NULL),
-(3, 21, 2, 0, 1300000, N'DaXacNhan', N'DaThanhToan', '2025-12-18', NULL, NULL),
-(3, 22, 2, 0, 2800000, N'ChoXacNhan', N'ChuaThanhToan', '2025-12-19', NULL, NULL),
-(3, 23, 1, 0, 450000, N'DaXacNhan', N'DaThanhToan', '2025-12-20', NULL, NULL);
+(3, 17, 2, 1, 7700000, N'DaXacNhan', N'DaThanhToan', '2025-12-14', NULL, NULL)
 GO
 
 -- BẢNG 7: THANHTOAN (~15 Giao dịch)
@@ -394,13 +390,8 @@ INSERT INTO ThanhToan (maDatTour, phuongThucThanhToan, soTien, ngayThanhToan) VA
 (7, N'ChuyenKhoan', 1600000, '2025-12-07'),
 (8, N'ViDienTu', 3000000, '2025-12-08'),
 (9, N'ChuyenKhoan', 1200000, '2025-12-09'),
-(10, N'TheTinDung', 5000000, '2025-12-10'),
 (13, N'ViDienTu', 2400000, '2025-12-13'),
-(14, N'ChuyenKhoan', 7700000, '2025-12-14'),
-(16, N'TheTinDung', 1500000, '2025-12-16'),
-(17, N'ViDienTu', 1800000, '2025-12-17'),
-(18, N'ChuyenKhoan', 1300000, '2025-12-18'),
-(20, N'ViDienTu', 450000, '2025-12-20');
+(14, N'ChuyenKhoan', 7700000, '2025-12-14')
 GO
 
 -- BẢNG 8: DANHGIA (20 Reviews)
@@ -413,9 +404,9 @@ INSERT INTO DanhGia (maTour, maNguoiDung, diemSo, binhLuan, thoiGianTao) VALUES
 (9, 3, 5.0, N'Vui vẻ', GETDATE()), (10, 4, 4.0, N'Ruộng đẹp', GETDATE()),
 (11, 3, 5.0, N'Hùng vĩ', GETDATE()), (12, 4, 4.5, N'Linh thiêng', GETDATE()),
 (13, 3, 4.0, N'Cát mịn', GETDATE()), (14, 4, 5.0, N'Nước trong', GETDATE()),
-(15, 3, 3.5, N'Hơi đông', GETDATE()), (16, 4, 4.0, N'Biển sạch', GETDATE()),
-(17, 3, 5.0, N'Eo gió đẹp', GETDATE()), (18, 4, 4.0, N'Cổ kính', GETDATE()),
-(19, 3, 4.5, N'Rừng mát', GETDATE()), (20, 4, 5.0, N'Đồ ăn ngon', GETDATE());
+(14, 3, 3.5, N'Hơi đông', GETDATE()), (16, 4, 4.0, N'Biển sạch', GETDATE()),
+(11, 3, 5.0, N'Eo gió đẹp', GETDATE()), (18, 4, 4.0, N'Cổ kính', GETDATE()),
+(12, 3, 4.5, N'Rừng mát', GETDATE()), (20, 4, 5.0, N'Đồ ăn ngon', GETDATE());
 GO
 
 -- BẢNG 9: KHACHHANGTHAMGIA (Chi tiết người đi - ~20 người)
@@ -436,10 +427,10 @@ INSERT INTO KhachHangThamGia (maDatTour, hoTen, ngaySinh, soDienThoai, gioiTinh,
 (12, N'Khách 12', '1997-07-07', NULL, N'Nam', N'Quảng Trị'),
 (13, N'Khách 13', '1989-09-09', NULL, N'Nam', N'Quảng Trị'),
 (14, N'Khách 14', '1980-08-08', NULL, N'Nam', N'Quảng Trị'),
-(15, N'Khách 15', '1982-02-02', NULL, N'Nam', N'Quảng Trị'),
-(16, N'Khách 16', '1999-11-11', NULL, N'Nam', N'Quảng Trị'),
-(17, N'Khách 17', '1992-12-22', NULL, N'Nam', N'Quảng Trị'),
-(20, N'Nguyễn Long Nhật', '1999-01-01', N'0988123456', N'Nam', N'Quảng Trị');
+(12, N'Khách 15', '1982-02-02', NULL, N'Nam', N'Quảng Trị'),
+(11, N'Khách 16', '1999-11-11', NULL, N'Nam', N'Quảng Trị'),
+(12, N'Khách 17', '1992-12-22', NULL, N'Nam', N'Quảng Trị'),
+(1, N'Nguyễn Long Nhật', '1999-01-01', N'0988123456', N'Nam', N'Quảng Trị');
 GO
 
 -- HinhAnhTour
