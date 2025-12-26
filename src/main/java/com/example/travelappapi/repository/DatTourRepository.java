@@ -34,4 +34,7 @@ public interface DatTourRepository extends JpaRepository<DatTour, Integer> {
     List<DatTour> searchBookingsForAdmin(@org.springframework.data.repository.query.Param("status") String status,
                                         @org.springframework.data.repository.query.Param("q") String q);
 
+    // Kiểm tra xem có đơn đặt nào thuộc về mã lịch trình này không, nếu có thì không xóa lịch được
+    boolean existsByLichKhoiHanh_MaLichKhoiHanh(Integer maLich);
+
 }
